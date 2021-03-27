@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "Renderer.h"
+#include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 
@@ -146,11 +147,12 @@ int main(void)
 		GLCall(glGenVertexArrays(1, &vao));
 		GLCall(glBindVertexArray(vao));
 
-		VertexBuffer vertexBugger(positions, 4 * 2 * sizeof(float));
+		VertexArray vertexArray;
+		VertexBuffer vertexBuffer(positions, 4 * 2 * sizeof(float));
 
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0)); // соединяет buffer с vao : индекс 0 vao биндится на buffer
-		// если я хочу забиндить другой буфер, то индекс будет 1. также его нужно glEnableVertexAttribArray(1)
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		vertexArray.AddBUffer(vertexBuffer, layout);
 
 		IndexBuffer indexBuffer(indices, 6);
 
@@ -178,7 +180,7 @@ int main(void)
 			GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
 			// т.к. забиндили vao и buffer, то остается просто забиндить здесь vao и ibo
-			GLCall(glBindVertexArray(vao));
+			vertexArray.Bind();
 			indexBuffer.Bind();
 
 			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
