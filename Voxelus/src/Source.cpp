@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
 
@@ -68,10 +69,11 @@ int main(void)
 		shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.8f, 1.0f);
 
 		vertexArray.Unbind();
-		shader.Unbind();
 		vertexBuffer.Unbind();
 		indexBuffer.Unbind();
-		// buffers unbind
+		shader.Unbind();
+
+		Renderer renderer;
 
 		float r = 0.0f;
 		float increment = 0.01f;
@@ -79,16 +81,11 @@ int main(void)
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
-			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+			renderer.Clear();
 
 			shader.Bind();
 			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-
-			// т.к. забиндили vao и buffer, то остается просто забиндить здесь vao и ibo
-			vertexArray.Bind();
-			indexBuffer.Bind();
-
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			renderer.Draw(vertexArray, indexBuffer, shader);
 
 			if (r > 1.0f || r < 0.0f)
 			{

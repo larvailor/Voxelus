@@ -47,12 +47,12 @@ void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2,
 //		Else
 //
 
-void Shader::Bind()
+void Shader::Bind() const
 {
 	GLCall(glUseProgram(mRenderId));
 }
 
-void Shader::Unbind()
+void Shader::Unbind() const
 {
 	GLCall(glUseProgram(0));
 }
