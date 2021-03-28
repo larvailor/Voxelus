@@ -38,6 +38,16 @@ Shader::~Shader()
 //		Uniforms
 //
 
+void Shader::SetUniform1i(const std::string& name, int v)
+{
+	GLCall(glUniform1i(ExtractUniformLocation(name), v));
+}
+
+void Shader::SetUniform1f(const std::string& name, float v)
+{
+	GLCall(glUniform1f(ExtractUniformLocation(name), v));
+}
+
 void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
 	GLCall(glUniform4f(ExtractUniformLocation(name), v0, v1, v2, v3));
