@@ -1,17 +1,35 @@
 #include "VertexArray.h"
 #include "Renderer.h"
 
+/////////////////////////////////////////////////
+// 
+//		PUBLIC METHODS
+//
+/////////////////////////////////////////////////
+
+//-----------------------------------------------
+//		Constructors
+//
+
 VertexArray::VertexArray()
 {
 	GLCall(glGenVertexArrays(1, &mRendererId));
 }
+
+//-----------------------------------------------
+//		Destructors
+//
 
 VertexArray::~VertexArray()
 {
 	GLCall(glDeleteVertexArrays(1, &mRendererId));
 }
 
-void VertexArray::AddBUffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
+//-----------------------------------------------
+//		Else
+//
+
+void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
 {
 	Bind();
 	vb.Bind();

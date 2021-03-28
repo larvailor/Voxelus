@@ -2,6 +2,16 @@
 
 #include "Renderer.h"
 
+/////////////////////////////////////////////////
+// 
+//		PUBLIC METHODS
+//
+/////////////////////////////////////////////////
+
+//-----------------------------------------------
+//		Constructors
+//
+
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
 	: mCount(count)
 {
@@ -12,10 +22,27 @@ IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
 }
 
+//-----------------------------------------------
+//		Destructors
+//
+
 IndexBuffer::~IndexBuffer()
 {
 	GLCall(glDeleteBuffers(1, &mRendererId));
 }
+
+//-----------------------------------------------
+//		Getters
+//
+
+unsigned int IndexBuffer::GetCount() const
+{
+	return mCount;
+}
+
+//-----------------------------------------------
+//		Else
+//
 
 void IndexBuffer::Bind() const
 {
@@ -26,9 +53,4 @@ void IndexBuffer::Bind() const
 void IndexBuffer::Unbind() const
 {
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-}
-
-unsigned int IndexBuffer::GetCount() const
-{
-	return mCount;
 }
