@@ -12,7 +12,6 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 
-
 int main(void)
 {
 	GLFWwindow* window;
@@ -60,7 +59,7 @@ int main(void)
 		VertexBuffer vertexBuffer(positions, 4 * 2 * sizeof(float));
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
-		vertexArray.AddBUffer(vertexBuffer, layout);
+		vertexArray.AddBuffer(vertexBuffer, layout);
 
 		IndexBuffer indexBuffer(indices, 6);
 
@@ -84,7 +83,6 @@ int main(void)
 
 			shader.Bind();
 			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-
 
 			// т.к. забиндили vao и buffer, то остается просто забиндить здесь vao и ibo
 			vertexArray.Bind();

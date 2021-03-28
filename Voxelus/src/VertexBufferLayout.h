@@ -33,11 +33,51 @@ struct VertexBufferElement
 class VertexBufferLayout
 {
 public:
+	/////////////////////////////////////////////////
+	// 
+	//		Methods
+	//
+	/////////////////////////////////////////////////
+
+	//-----------------------------------------------
+	//		Constructors
+	//
+
 	VertexBufferLayout()
 		: mStride(0)
 	{
 
 	}
+
+	//-----------------------------------------------
+	//		Destructors
+	//
+
+	// ...
+
+	//-----------------------------------------------
+	//		Getters
+	//
+
+	const std::vector<VertexBufferElement>& GetElements() const
+	{
+		return mElements;
+	}
+
+	unsigned int GetStride() const
+	{
+		return mStride;
+	}
+	
+	//-----------------------------------------------
+	//		Setters
+	//
+
+	// ...
+
+	//-----------------------------------------------
+	//		Else
+	//
 
 	template<typename T>
 	void Push(unsigned int count)
@@ -66,17 +106,13 @@ public:
 		mStride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE);
 	}
 
-	const std::vector<VertexBufferElement>& GetElements() const
-	{
-		return mElements;
-	}
-
-	unsigned int GetStride() const
-	{
-		return mStride;
-	}
-
 private:
+	/////////////////////////////////////////////////
+	// 
+	//		Variables
+	//
+	/////////////////////////////////////////////////
+	
 	std::vector<VertexBufferElement> mElements;
 	unsigned int mStride;
 };
