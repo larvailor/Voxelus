@@ -1,11 +1,3 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
 #include "Renderer.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -13,6 +5,16 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 int main(void)
 {
@@ -27,7 +29,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(1280, 1280, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(1280, 720, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -46,11 +48,12 @@ int main(void)
 
 	{
 		float positions[] = {
-			-0.5f, -0.5f, 0.0f, 0.0f, // 0
-			 0.5f, -0.5f, 1.0f, 0.0f, // 1
-			 0.5f,  0.5f, 1.0f, 1.0f, // 2
-			-0.5f,  0.5f, 0.0f, 1.0f  // 3
+			100.0f, 100.0f, 0.0f, 0.0f, 0.0f,
+			400.0f, 100.0f, 0.0f, 1.0f, 0.0f,
+			400.0f, 400.0f, 0.0f, 1.0f, 1.0f,
+			100.0f, 400.0f, 0.0f, 0.0f, 1.0f 
 		};
+
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0
@@ -61,17 +64,20 @@ int main(void)
 
 		VertexArray vertexArray;
 
-		VertexBuffer vertexBuffer(positions, 4 * 4 * sizeof(float));
+		VertexBuffer vertexBuffer(positions, 4 * 5 * sizeof(float));
 		VertexBufferLayout layout;
-		layout.Push<float>(2);
+		layout.Push<float>(3);
 		layout.Push<float>(2);
 		vertexArray.AddBuffer(vertexBuffer, layout);
 
 		IndexBuffer indexBuffer(indices, 6);
 
+		glm::mat4 projMat = glm::ortho(0.0f, 1280.0f, 0.0f, 720.0f, -1.0f, 1.0f);
+
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
 		shader.SetUniform4f("u_Color", 0.0f, 0.8f, 0.8f, 1.0f);
+		shader.SetUniformMat4f("u_MVP", projMat);
 
 		Texture texture("res/textures/lavastoneBig.png");
 		texture.Bind();
@@ -86,6 +92,7 @@ int main(void)
 
 		float r = 0.0f;
 		float increment = 0.01f;
+
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
