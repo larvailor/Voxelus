@@ -1,5 +1,9 @@
 #include "Renderer.h"
 
+#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
+
 #include <iostream>
 
 void GlClearError()
