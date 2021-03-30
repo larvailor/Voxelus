@@ -85,6 +85,8 @@ protected:
 
 	std::map<ComponentType, std::shared_ptr<BaseComponent>> mComponents;
 
+	// TODO: add scene ref later
+
 private:
 	static unsigned int NextEntityId;
 };

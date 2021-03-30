@@ -50,8 +50,14 @@ glm::mat4 TransformComponent::GetTransformMat() const
 {
 	glm::mat4 transformMat(1.0f);
 	transformMat = glm::scale(transformMat, mScale);
-	// TODO: add rotations support
+
+	// Euler Angles. Y -> Z -> X
+	transformMat = glm::rotate(transformMat, glm::radians(mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	transformMat = glm::rotate(transformMat, glm::radians(mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	transformMat = glm::rotate(transformMat, glm::radians(mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+
 	transformMat = glm::translate(transformMat, mPosition);
+
 	return transformMat;
 }
 
