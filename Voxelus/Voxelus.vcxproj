@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;src\core\ECS;src\vendor;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src\scene\;src\vendor;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdfax.h</PrecompiledHeaderFile>
@@ -107,7 +107,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;src\core\ECS;src\vendor;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src\scene\;src\vendor;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdfax.h</PrecompiledHeaderFile>
@@ -138,9 +138,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\Service.cpp" />
-    <ClCompile Include="src\scene\ECS\BaseComponent.cpp" />
-    <ClCompile Include="src\scene\ECS\Entity.cpp" />
-    <ClCompile Include="src\scene\ECS\TransformComponent.cpp" />
+    <ClCompile Include="src\scene\ECS\components\BaseComponent.cpp" />
+    <ClCompile Include="src\scene\ECS\components\CameraComponent.cpp" />
+    <ClCompile Include="src\scene\ECS\entities\Entity.cpp" />
+    <ClCompile Include="src\scene\ECS\components\TransformComponent.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -159,9 +160,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Service.h" />
-    <ClInclude Include="src\scene\ECS\BaseComponent.h" />
-    <ClInclude Include="src\scene\ECS\Entity.h" />
-    <ClInclude Include="src\scene\ECS\TransformComponent.h" />
+    <ClInclude Include="src\scene\ECS\components\BaseComponent.h" />
+    <ClInclude Include="src\scene\ECS\components\CameraComponent.h" />
+    <ClInclude Include="src\scene\ECS\entities\Entity.h" />
+    <ClInclude Include="src\scene\ECS\components\TransformComponent.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />

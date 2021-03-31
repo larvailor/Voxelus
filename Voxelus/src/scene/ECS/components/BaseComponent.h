@@ -2,8 +2,9 @@
 
 enum class ComponentType
 {
-	None = -1,
-	Transform
+	None      = -1,
+	Transform = 0,
+	Camera    = 1,
 };
 
 class BaseComponent

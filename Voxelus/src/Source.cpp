@@ -7,8 +7,9 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "scene/ECS/Entity.h"
-#include "scene/ECS/TransformComponent.h"
+
+#include "scene/ECS/entities/Entity.h"
+#include "scene/ECS/components/TransformComponent.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -98,11 +99,10 @@ int main(void)
 		//}
 
 		Entity plane;
-		plane.AddComponent<TransformComponent>();
 		std::shared_ptr<TransformComponent> transformComponent = plane.GetComponent<TransformComponent>();
-		transformComponent->SetScale(glm::vec3(2.0f, 2.0f, 1.0f));
-		transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
-		transformComponent->SetPosition(glm::vec3(-20.0f, -20.0f, 00.0f));
+		//transformComponent->SetScale(glm::vec3(3.0f, 1.0f, 1.0f));
+		//transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
+		//transformComponent->SetPosition(glm::vec3(-20.0f, -20.0f, 00.0f));
 
 		const glm::vec3 cStartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
 		const glm::vec3 cStartLookDirection = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));

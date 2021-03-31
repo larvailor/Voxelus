@@ -47,6 +47,12 @@ public:
 	void SetScale(glm::vec3 scale);
 
 private:
+	/////////////////////////////////////////////////
+	// 
+	//		Variables
+	//
+	/////////////////////////////////////////////////
+
 	glm::vec3 mPosition;
 	glm::vec3 mRotation;
 	glm::vec3 mScale;

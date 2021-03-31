@@ -1,6 +1,7 @@
 #include "stdfax.h"
 
 #include "Entity.h"
+#include "ECS/components/TransformComponent.h"
 
 /////////////////////////////////////////////////
 // 
@@ -16,6 +17,8 @@ Entity::Entity()
 {
 	mId = NextEntityId;
 	NextEntityId += 1;
+
+	AddComponent<TransformComponent>();
 }
 
 //-----------------------------------------------
