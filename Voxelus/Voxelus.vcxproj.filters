@@ -39,13 +39,19 @@
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\ECS\Entity.cpp">
+    <ClCompile Include="src\stdfax.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\ECS\components\TransformComponent.cpp">
+    <ClCompile Include="src\scene\ECS\BaseComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\ECS\components\BaseComponent.cpp">
+    <ClCompile Include="src\scene\ECS\TransformComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\ECS\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\Service.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,14 +83,28 @@
     <ClInclude Include="src\vendor\stb_image\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ECS\Entity.h">
+    <ClInclude Include="src\stdfax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ECS\components\TransformComponent.h">
+    <ClInclude Include="src\scene\ECS\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ECS\components\BaseComponent.h">
+    <ClInclude Include="src\scene\ECS\BaseComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\Service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\ECS\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\lavastone.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\lavastoneBig.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

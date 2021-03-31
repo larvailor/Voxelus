@@ -1,14 +1,7 @@
 #pragma once
 
-#include "components/BaseComponent.h"
-#include "components/TransformComponent.h"
-
-#include <map>
-#include <iostream>
-
-#ifndef DEBUG_MODE
-	#define DEBUG_MODE
-#endif //DEBUG_MODE
+#include "scene/ECS/BaseComponent.h"
+#include "scene/ECS/TransformComponent.h"
 
 class Entity
 {
@@ -48,7 +41,7 @@ public:
 		if (HasComponent<T>())
 		{
 			std::cout << "	Debug: [Entity::AddComponent] already have component " << static_cast<int>(T::GetStaticComponentType()) << std::endl;
-			// ASSERT(false);
+			ASSERT(false);
 		}
 #endif // DEBUG_MODE
 
@@ -64,12 +57,14 @@ public:
 	template<typename T>
 	const std::shared_ptr<T> GetComponent()
 	{
+		ASSERT(HasComponent<T>())
 		return std::dynamic_pointer_cast<T>(mComponents.at(T::GetStaticComponentType()));
 	}
 
 	template<typename T>
 	std::shared_ptr<T> GetMutableComponent()
 	{
+		ASSERT(HasComponent<T>())
 		return std::dynamic_pointer_cast<T>(mComponents.at(T::GetStaticComponentType()));
 	}
 

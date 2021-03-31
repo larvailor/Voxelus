@@ -1,9 +1,6 @@
-#include "Shader.h"
+#include "stdfax.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
+#include "Shader.h"
 
 #include "Renderer.h"
 

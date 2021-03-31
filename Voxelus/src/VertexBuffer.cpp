@@ -1,3 +1,5 @@
+#include "stdfax.h"
+
 #include "VertexBuffer.h"
 
 #include "Renderer.h"

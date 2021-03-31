@@ -1,6 +1,6 @@
-#include "Entity.h"
+#include "stdfax.h"
 
-#include <iostream>
+#include "Entity.h"
 
 /////////////////////////////////////////////////
 // 
