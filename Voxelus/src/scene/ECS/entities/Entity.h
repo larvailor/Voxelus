@@ -1,7 +1,6 @@
 #pragma once
 
-#include "scene/ECS/BaseComponent.h"
-#include "scene/ECS/TransformComponent.h"
+#include "ECS/components/BaseComponent.h"
 
 class Entity
 {
@@ -22,7 +21,7 @@ public:
 	//		Destructors
 	//
 
-	~Entity();
+	virtual ~Entity();
 
 	//-----------------------------------------------
 	//		Getters

@@ -2,6 +2,13 @@
 
 #include "TransformComponent.h"
 
+namespace
+{
+	const glm::vec3 cStartPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 cStartRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 cStartScale    = glm::vec3(1.0f, 1.0f, 1.0f);
+}
+
 /////////////////////////////////////////////////
 // 
 //		PUBLIC METHODS
@@ -13,9 +20,9 @@
 //
 
 TransformComponent::TransformComponent(unsigned int entityId)
-	: mPosition(0.0f, 0.0f, 0.0f)
-	, mRotation(0.0f, 0.0f, 0.0f)
-	, mScale(1.0f, 1.0f, 1.0f)
+	: mPosition(cStartPosition)
+	, mRotation(cStartRotation)
+	, mScale(cStartScale)
 	, BaseComponent(entityId, ComponentType::Transform)
 {
 }
