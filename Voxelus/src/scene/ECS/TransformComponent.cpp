@@ -1,3 +1,5 @@
+#include "stdfax.h"
+
 #include "TransformComponent.h"
 
 /////////////////////////////////////////////////

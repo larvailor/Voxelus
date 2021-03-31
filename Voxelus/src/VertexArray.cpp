@@ -1,6 +1,8 @@
+#include "stdfax.h"
+
 #include "VertexArray.h"
-#include "Renderer.h"
 #include "VertexBufferLayout.h"
+#include "Renderer.h"
 
 /////////////////////////////////////////////////
 // 

@@ -1,3 +1,5 @@
+#include "stdfax.h"
+
 #include "Renderer.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -5,22 +7,13 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "Entity.h"
-#include "components/TransformComponent.h"
+#include "scene/ECS/Entity.h"
+#include "scene/ECS/TransformComponent.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
-#ifndef DEBUG_MODE
-	#define DEBUG_MODE
-#endif //DEBUG_MODE
 
 unsigned int Entity::NextEntityId = 1;
 
@@ -123,8 +116,6 @@ int main(void)
 		glm::mat4 view = glm::lookAt(cStartPosition, cStartPosition + cStartLookDirection, cStartUp);
 		glm::mat4 proj = glm::perspective(glm::radians(cStartFieldOfView), 4.0f / 3.0f, cStartNearPlane, cStartFarPlane);
 		glm::mat4 mvp = proj * view * model;
-
-		//
 
 		//glm::mat4 projMat = glm::ortho(0.0f, 1280.0f, 0.0f, 720.0f, -1.0f, 1.0f);
 

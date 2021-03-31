@@ -1,3 +1,5 @@
+#include "stdfax.h"
+
 #include "IndexBuffer.h"
 
 #include "Renderer.h"
