@@ -3,7 +3,6 @@
 #include "core/Service.h"
 
 #include <iostream>
-#include <functional>
 #include <memory>
 #include <fstream>
 #include <string>
