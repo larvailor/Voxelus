@@ -21,8 +21,15 @@ public:
 	//		Constructors
 	//
 
+	Shader();
 	Shader(const std::string& filePath);
+
+	//-----------------------------------------------
+	//		Initialize
+	//
 	
+	void Initialize(const std::string& filePath);
+
 	//-----------------------------------------------
 	//		Destructors
 	//

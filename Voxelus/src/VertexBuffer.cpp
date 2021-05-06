@@ -14,6 +14,11 @@
 //		Constructors
 //
 
+VertexBuffer::VertexBuffer()
+{
+	GLCall(glGenBuffers(1, &mRendererId));
+}
+
 VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 {
 	GLCall(glGenBuffers(1, &mRendererId));

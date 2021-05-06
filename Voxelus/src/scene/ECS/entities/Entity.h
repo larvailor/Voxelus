@@ -2,6 +2,8 @@
 
 #include "ECS/components/BaseComponent.h"
 
+class Renderer;
+
 class Entity
 {
 public:
@@ -22,6 +24,13 @@ public:
 	//
 
 	virtual ~Entity();
+
+	//-----------------------------------------------
+	//		Render
+	//
+
+	//void Draw(const Renderer& renderer, glm::mat4& viewMat, glm::mat4& projMat);
+
 
 	//-----------------------------------------------
 	//		Getters
