@@ -2,9 +2,6 @@
 
 #include "BaseComponent.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
 class TransformComponent : public BaseComponent
 {
 public:
@@ -39,7 +36,7 @@ public:
 	static ComponentType GetStaticComponentType();
 
 	//-----------------------------------------------
-	//		Setter
+	//		Setters
 	//
 
 	void SetPosition(const glm::vec3& position);

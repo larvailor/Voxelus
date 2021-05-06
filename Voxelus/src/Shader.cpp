@@ -14,9 +14,23 @@
 //		Constructors
 //
 
+Shader::Shader()
+	: mRenderId(0)
+{
+}
+
 Shader::Shader(const std::string& filePath)
 	: mFilePath(filePath)
 	, mRenderId(0)
+{
+	Initialize(filePath);
+}
+
+//-----------------------------------------------
+//		Initialize
+//
+
+void Shader::Initialize(const std::string& filePath)
 {
 	ShaderSourceCode shaderSourceCode = ReadShader(filePath);
 	mRenderId = CreateShader(shaderSourceCode.VertexSource, shaderSourceCode.FragmentSource);

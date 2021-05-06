@@ -13,6 +13,7 @@ public:
 	//		Constructors
 	//
 
+	VertexBuffer();
 	VertexBuffer(const void* data, unsigned int size);
 
 	//-----------------------------------------------

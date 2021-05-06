@@ -8,8 +8,9 @@
 #include "Shader.h"
 #include "Texture.h"
 
-#include "scene/ECS/entities/Entity.h"
-#include "scene/ECS/components/TransformComponent.h"
+#include "ECS/components/Components.h"
+#include "ECS/entities/Entity.h"
+#include "Renderer.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -17,6 +18,201 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 unsigned int Entity::NextEntityId = 1;
+
+/////////////////////////////////////////////////
+// 
+//		Constants
+//
+/////////////////////////////////////////////////
+
+namespace InitConstants
+{
+	namespace Camera
+	{
+		const glm::vec3 cStartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
+		const glm::vec3 cStartLookDirection = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
+		const glm::vec3 cStartUp = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+
+		const float cStartNearPlane = 0.01f;
+		const float cStartFarPlane = 500.0f;
+		const float cStartFieldOfView = 60.0f;
+
+		const ProjectionType cStartProjectionType = ProjectionType::Perspective;
+	}
+
+	namespace Shaders
+	{
+		const std::string VoxelPath = "res/shaders/Voxel.shader";
+	}
+}
+
+namespace Mesh
+{
+	namespace Plane
+	{
+		float Vertices[] = {
+			0.0f,  0.0f,  0.0f,
+			30.0f, 0.0f,  0.0f,
+			30.0f, 30.0f, 0.0f,
+			0.0f,  30.0f, 0.0f
+		};
+
+		unsigned int Indices[] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+	};
+
+
+
+	namespace Cube
+	{
+
+		 //	    0 - - -  1
+		 //	  / .      / |
+		 //	4  -.- - 5   |
+		 //	|   3 . .|.  2
+		 //	| .`     | /
+		 //	7 - - -  6
+
+
+		const float x = 10.0f;
+		const float y = 10.0f;
+		const float z = 10.0f;
+		unsigned int NumberOfVertices = 8;
+		float Vertices[] = {
+			-x,  y, -z,
+			 x,  y, -z,
+			 x, -y, -z,
+			-x, -y, -z,
+			-x,  y,  z,
+			 x,  y,  z,
+			 x, -y,  z,
+			-x, -y,  z,
+		};
+	
+		unsigned int NumberOfIndices = 36;
+		unsigned int Indices[] = {
+			0, 1, 2,
+			0, 2, 3,
+			2, 1, 5,
+			2, 5, 6,
+			3, 2, 6,
+			3, 6, 7,
+			0, 3, 7,
+			0, 7, 4,
+			1, 0, 4,
+			1, 4, 5,
+			6, 5, 4,
+			6, 4, 7,
+		};
+	};
+
+}
+
+
+
+/////////////////////////////////////////////////
+// 
+//		Globals
+//
+/////////////////////////////////////////////////
+
+//-----------------------------------------------
+//		Entities
+//
+
+Entity mMainCamera;
+
+std::vector<Entity> mVoxels;
+std::vector<Entity> mFloor;
+
+//-----------------------------------------------
+//		Shaders
+//
+
+Shader mVoxelShader;
+
+//-----------------------------------------------
+//		Render
+//
+
+Renderer mRenderer;
+
+
+
+/////////////////////////////////////////////////
+// 
+//		Methods
+//
+/////////////////////////////////////////////////
+
+//-----------------------------------------------
+//		Camera
+//
+
+void InitCamera()
+{
+	mMainCamera.AddComponent<CameraComponent>();
+	
+	std::shared_ptr<CameraComponent> cameraComp = mMainCamera.GetComponent<CameraComponent>();
+	cameraComp->SetNearPlane(InitConstants::Camera::cStartNearPlane);
+	cameraComp->SetFarPlane(InitConstants::Camera::cStartFarPlane);
+	cameraComp->SetFieldOfView(InitConstants::Camera::cStartFieldOfView);
+
+	cameraComp->SetProjectionType(InitConstants::Camera::cStartProjectionType);
+
+	cameraComp->SetLookDirection(InitConstants::Camera::cStartLookDirection);
+	cameraComp->SetUp(InitConstants::Camera::cStartUp);
+
+	mMainCamera.GetComponent<TransformComponent>()->SetPosition(InitConstants::Camera::cStartPosition);
+}
+
+glm::mat4& GetViewMat()
+{
+	glm::mat4 viewMat;
+
+	std::shared_ptr<TransformComponent> cameraTransformComp = mMainCamera.GetComponent<TransformComponent>();
+	std::shared_ptr<CameraComponent> cameraCameraComp = mMainCamera.GetComponent<CameraComponent>();
+
+	viewMat = glm::lookAt(cameraTransformComp->GetPosition(), cameraTransformComp->GetPosition() + cameraCameraComp->GetLookDirection(), cameraCameraComp->GetUp());
+	return viewMat;
+
+}
+
+glm::mat4& GetProjectionMat()
+{
+	glm::mat4 projMat = mMainCamera.GetComponent<CameraComponent>()->GetProjectionMat();
+	return projMat;
+}
+
+//-----------------------------------------------
+//		Shaders
+//
+
+void InitVoxelShader()
+{
+	mVoxelShader.Initialize(InitConstants::Shaders::VoxelPath);
+	mVoxelShader.Unbind();
+}
+
+//-----------------------------------------------
+//		Voxels
+//
+
+
+//-----------------------------------------------
+//		Floor
+//
+
+//-----------------------------------------------
+//		Else
+//
+
+
+//-----------------------------------------------
+//		Main
+//
 
 int main(void)
 {
@@ -49,105 +245,76 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	{
-		//float positions[] = {
-		//	100.0f, 100.0f, 0.0f, 0.0f, 0.0f,
-		//	400.0f, 100.0f, 0.0f, 1.0f, 0.0f,
-		//	400.0f, 400.0f, 0.0f, 1.0f, 1.0f,
-		//	100.0f, 400.0f, 0.0f, 0.0f, 1.0f 
-		//};
-
-		float positions[] = {
-			0.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-			30.0f, 0.0f,  0.0f, 1.0f, 0.0f,
-			30.0f, 30.0f, 0.0f, 1.0f, 1.0f,
-			0.0f,  30.0f, 0.0f, 0.0f, 1.0f 
-		};
-
-		unsigned int indices[] = {
-			0, 1, 2,
-			2, 3, 0
-		};
-
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-		VertexArray vertexArray;
-
-		VertexBuffer vertexBuffer(positions, 4 * 5 * sizeof(float));
-		VertexBufferLayout layout;
-		layout.Push<float>(3);
-		layout.Push<float>(2);
-		vertexArray.AddBuffer(vertexBuffer, layout);
-
-		IndexBuffer indexBuffer(indices, 6);
-
-
-
-
-		// Test stuff
-
-		//Entity plane;
-		//plane.AddComponent<TransformComponent>();
-		//if (plane.HasComponent<TransformComponent>())
-		//{
-		//	plane.GetMutableComponent<TransformComponent>()->SetPosition(glm::vec3(123.0f, 2.0f, 4.0f));
-
-		//	const std::shared_ptr<TransformComponent> tc1 = plane.GetComponent<TransformComponent>();
-		//	auto pos = tc1->GetPosition();
-
-		//	plane.AddComponent<TransformComponent>();
-		//}
-
-		Entity plane;
-		std::shared_ptr<TransformComponent> transformComponent = plane.GetComponent<TransformComponent>();
-		//transformComponent->SetScale(glm::vec3(3.0f, 1.0f, 1.0f));
-		//transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
-		//transformComponent->SetPosition(glm::vec3(-20.0f, -20.0f, 00.0f));
-
-		const glm::vec3 cStartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
-		const glm::vec3 cStartLookDirection = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
-		const glm::vec3 cStartUp = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-
-		const float cStartNearPlane = 0.01f;
-		const float cStartFarPlane = 500.0f;
-		const float cStartFieldOfView = 45.0f;
-
-		glm::mat4 model = transformComponent->GetTransformMat();
-		glm::mat4 view = glm::lookAt(cStartPosition, cStartPosition + cStartLookDirection, cStartUp);
-		glm::mat4 proj = glm::perspective(glm::radians(cStartFieldOfView), 4.0f / 3.0f, cStartNearPlane, cStartFarPlane);
-		glm::mat4 mvp = proj * view * model;
-
-		//glm::mat4 projMat = glm::ortho(0.0f, 1280.0f, 0.0f, 720.0f, -1.0f, 1.0f);
-
-		Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
-		shader.SetUniform4f("u_Color", 0.0f, 0.8f, 0.8f, 1.0f);
-		shader.SetUniformMat4f("u_MVP", mvp);
-
-		Texture texture("res/textures/lavastoneBig.png");
-		texture.Bind();
-		shader.SetUniform1i("u_Texture", 0);
-
-		vertexArray.Unbind();
-		vertexBuffer.Unbind();
-		indexBuffer.Unbind();
-		shader.Unbind();
-
-		Renderer renderer;
-
-
 		float r = 0.0f;
 		float increment = 0.01f;
+
+
+		//-----------------------------------------------
+		//		Test stuff
+		//
+		Entity plane1;
+		mVoxels.push_back(plane1);
+
+		//Entity plane2;
+		//std::shared_ptr<TransformComponent> transformComponent2 = plane2.GetComponent<TransformComponent>();
+		//////transformComponent->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		//////transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
+		//transformComponent2->SetPosition(glm::vec3(-75.0f, -50.0f, 0.0f));
+
+		//mVoxels.push_back(plane2);
+
+		//-----------------------------------------------
+		//		Initialization
+		//
+
+		InitCamera();
+
+		InitVoxelShader();
+
+			// Voxel buffers
+		VertexArray VoxelVertexArray;
+		VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 3 * sizeof(float));
+		VertexBufferLayout VoxelVertexBufferLayout;
+		IndexBuffer VoxelIndexBuffer(Mesh::Cube::Indices, Mesh::Cube::NumberOfIndices);
+
+		VoxelVertexBufferLayout.Push<float>(3);
+		VoxelVertexArray.AddBuffer(VoxelVertexBuffer, VoxelVertexBufferLayout);
+
+		VoxelVertexArray.Unbind();
+		VoxelVertexBuffer.Unbind();
+		VoxelIndexBuffer.Unbind();
+			//
+
+
+		glm::mat4 viewMat;
+		glm::mat4 projMat;
+		glm::mat4 mvp;
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
-			renderer.Clear();
+			mRenderer.Clear();
 
-			shader.Bind();
-			shader.SetUniform4f("u_Color", r, 0.8f, 0.8f, 1.0f);
-			renderer.Draw(vertexArray, indexBuffer, shader);
+			// Math
+			viewMat = GetViewMat();
+			projMat = GetProjectionMat();
+
+			// Test draw one entity
+			mVoxelShader.Bind();
+
+			for (Entity& voxel : mVoxels)
+			{
+				mvp = projMat * viewMat * voxel.GetComponent<TransformComponent>()->GetTransformMat();
+
+				mVoxelShader.SetUniformMat4f("u_MVP", mvp);
+				mVoxelShader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+
+				mRenderer.Draw(VoxelVertexArray, VoxelIndexBuffer);
+			}
 
 			if (r > 1.0f || r < 0.0f)
 			{
