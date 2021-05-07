@@ -159,6 +159,7 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\LightSource.shader" />
     <None Include="res\shaders\Voxel.shader" />
   </ItemGroup>
   <ItemGroup>

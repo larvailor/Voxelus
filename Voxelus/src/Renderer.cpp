@@ -19,7 +19,8 @@
 
 void Renderer::Clear() const
 {
-	GLCall(glClear(GL_COLOR_BUFFER_BIT));
+	GLCall(glClearColor(0.8f, 0.8f, 0.8f, 1.0f));
+	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void Renderer::Draw(const VertexArray& vertexArray, const IndexBuffer& indexBuffer) const
@@ -27,5 +28,5 @@ void Renderer::Draw(const VertexArray& vertexArray, const IndexBuffer& indexBuff
 	vertexArray.Bind();
 	indexBuffer.Bind();
 
-	GLCall(glDrawElements(GL_LINES, indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
+	GLCall(glDrawElements(GL_TRIANGLE_STRIP, indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
