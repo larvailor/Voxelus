@@ -142,6 +142,7 @@
     <ClCompile Include="src\scene\ECS\components\CameraComponent.cpp" />
     <ClCompile Include="src\scene\ECS\components\MaterialComponent.cpp" />
     <ClCompile Include="src\scene\ECS\components\MeshComponent.cpp" />
+    <ClCompile Include="src\scene\ECS\entities\Camera.cpp" />
     <ClCompile Include="src\scene\ECS\entities\Entity.cpp" />
     <ClCompile Include="src\scene\ECS\components\TransformComponent.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="src\scene\ECS\components\Components.h" />
     <ClInclude Include="src\scene\ECS\components\MaterialComponent.h" />
     <ClInclude Include="src\scene\ECS\components\MeshComponent.h" />
+    <ClInclude Include="src\scene\ECS\entities\Camera.h" />
     <ClInclude Include="src\scene\ECS\entities\Entity.h" />
     <ClInclude Include="src\scene\ECS\components\TransformComponent.h" />
     <ClInclude Include="src\IndexBuffer.h" />

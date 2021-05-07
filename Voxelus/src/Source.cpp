@@ -6,16 +6,11 @@
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
-#include "Texture.h"
+#include "Renderer.h"
 
 #include "ECS/components/Components.h"
 #include "ECS/entities/Entity.h"
-#include "Renderer.h"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "ECS/entities/Camera.h"
 
 unsigned int Entity::NextEntityId = 1;
 
@@ -27,25 +22,12 @@ unsigned int Entity::NextEntityId = 1;
 
 namespace InitConstants
 {
-	namespace Camera
-	{
-		const glm::vec3 cStartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
-		const glm::vec3 cStartLookDirection = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
-		const glm::vec3 cStartUp = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-
-		const float cStartNearPlane = 0.01f;
-		const float cStartFarPlane = 1000.0f;
-		const float cStartFieldOfView = 60.0f;
-
-		const ProjectionType cStartProjectionType = ProjectionType::Perspective;
-	}
-
 	namespace Light
 	{
 		const std::string PathToShader = "res/shaders/LightSource.shader";
 
 		const glm::vec3 Position = glm::vec3(10.0f, 25.0f, 0.0f);
-		const glm::vec3 Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		const glm::vec3 Color = glm::vec3(0.2f, 0.2f, 1.0f);
 	}
 
 	namespace Voxel
@@ -85,14 +67,15 @@ namespace Mesh
 		const float HalfWidth = 10.0f;
 		unsigned int NumberOfVertices = 8;
 		float Vertices[] = {
-			 HalfWidth,  HalfWidth, -HalfWidth,	1.0f, 0.0f, 0.0f,
-			-HalfWidth,  HalfWidth, -HalfWidth,	0.0f, 1.0f, 0.0f,
-			 HalfWidth,  HalfWidth,  HalfWidth,	0.0f, 0.0f, 1.0f,
-			-HalfWidth,  HalfWidth,  HalfWidth,	1.0f, 0.0f, 0.0f,
-			 HalfWidth, -HalfWidth, -HalfWidth,	0.0f, 1.0f, 0.0f,
-			-HalfWidth, -HalfWidth, -HalfWidth,	1.0f, 0.0f, 0.0f,
-			-HalfWidth, -HalfWidth,  HalfWidth,	0.0f, 1.0f, 0.0f,
-			 HalfWidth, -HalfWidth,  HalfWidth,	0.0f, 0.0f, 1.0f
+			// x, y, z
+			 HalfWidth,  HalfWidth, -HalfWidth,
+			-HalfWidth,  HalfWidth, -HalfWidth,
+			 HalfWidth,  HalfWidth,  HalfWidth,
+			-HalfWidth,  HalfWidth,  HalfWidth,
+			 HalfWidth, -HalfWidth, -HalfWidth,
+			-HalfWidth, -HalfWidth, -HalfWidth,
+			-HalfWidth, -HalfWidth,  HalfWidth,
+			 HalfWidth, -HalfWidth,  HalfWidth
 		};
 
 		unsigned int NumberOfIndices = 14;
@@ -143,7 +126,7 @@ namespace Mesh
 //		Entities
 //
 
-Entity mMainCamera;
+Camera mMainCamera;
 
 std::vector<Entity> mVoxels;
 std::vector<Entity> mFloor;
@@ -184,74 +167,6 @@ bool mKeys[1024];
 //		Methods
 //
 /////////////////////////////////////////////////
-
-//-----------------------------------------------
-//		Camera
-//
-
-void InitCamera()
-{
-	mMainCamera.AddComponent<CameraComponent>();
-	
-	std::shared_ptr<CameraComponent> cameraComp = mMainCamera.GetComponent<CameraComponent>();
-	cameraComp->SetNearPlane(InitConstants::Camera::cStartNearPlane);
-	cameraComp->SetFarPlane(InitConstants::Camera::cStartFarPlane);
-	cameraComp->SetFieldOfView(InitConstants::Camera::cStartFieldOfView);
-
-	cameraComp->SetProjectionType(InitConstants::Camera::cStartProjectionType);
-
-	cameraComp->SetLookDirection(InitConstants::Camera::cStartLookDirection);
-	cameraComp->SetUp(InitConstants::Camera::cStartUp);
-
-	mMainCamera.GetComponent<TransformComponent>()->SetPosition(InitConstants::Camera::cStartPosition);
-}
-
-glm::mat4& GetViewMat()
-{
-	glm::mat4 viewMat;
-
-	std::shared_ptr<TransformComponent> cameraTransformComp = mMainCamera.GetComponent<TransformComponent>();
-	std::shared_ptr<CameraComponent> cameraCameraComp = mMainCamera.GetComponent<CameraComponent>();
-
-	viewMat = glm::lookAt(cameraTransformComp->GetPosition(), cameraTransformComp->GetPosition() + cameraCameraComp->GetLookDirection(), cameraCameraComp->GetUp());
-	return viewMat;
-
-}
-
-glm::mat4& GetProjectionMat()
-{
-	glm::mat4 projMat = mMainCamera.GetComponent<CameraComponent>()->GetProjectionMat();
-	return projMat;
-}
-
-void HandleCameraInput()
-{
-	float cameraSpeed = 1.5f;
-	if (mKeys[GLFW_KEY_LEFT_SHIFT])
-		cameraSpeed *= 2.0f;
-
-	std::shared_ptr<TransformComponent> cameraTransformComp = mMainCamera.GetComponent<TransformComponent>();
-	std::shared_ptr<CameraComponent> cameraCameraComp = mMainCamera.GetComponent<CameraComponent>();
-	if (mKeys[GLFW_KEY_W])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() + cameraSpeed * cameraCameraComp->GetLookDirection());
-	if (mKeys[GLFW_KEY_S])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() - cameraSpeed * cameraCameraComp->GetLookDirection());
-	if (mKeys[GLFW_KEY_A])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() - glm::normalize(glm::cross(cameraCameraComp->GetLookDirection(), cameraCameraComp->GetUp())) * cameraSpeed);
-	if (mKeys[GLFW_KEY_D])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() + glm::normalize(glm::cross(cameraCameraComp->GetLookDirection(), cameraCameraComp->GetUp())) * cameraSpeed);
-
-	if (mKeys[GLFW_KEY_Z])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() - cameraSpeed * cameraCameraComp->GetUp());
-	if (mKeys[GLFW_KEY_X])
-		cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() + cameraSpeed * cameraCameraComp->GetUp());
-
-	//float rotationSpeed = 1.0f; // deg
-	//if (mKeys[GLFW_KEY_Q])
-	//	cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() - cameraSpeed * cameraCameraComp->GetUp());
-	//if (mKeys[GLFW_KEY_E])
-	//	cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() + cameraSpeed * cameraCameraComp->GetUp());
-}
 
 //-----------------------------------------------
 //		Light
@@ -370,8 +285,8 @@ int main(void)
 
 		Entity plane3;
 		std::shared_ptr<TransformComponent> transformComponent3 = plane3.GetComponent<TransformComponent>();
-		////transformComponent->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
-		////transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
+		//transformComponent3->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+		//transformComponent3->SetRotation(glm::vec3(0.0f, 30.0f, 0.0f));
 		transformComponent3->SetPosition(glm::vec3(-25.0f, 35.0f, 0.0f));
 		mVoxels.push_back(plane3);
 
@@ -379,7 +294,6 @@ int main(void)
 		//		Initialization
 		//
 
-		InitCamera();
 		InitLight();
 		InitVoxel();
 
@@ -399,11 +313,10 @@ int main(void)
 		
 			// Voxel buffers
 		VertexArray VoxelVertexArray;
-		VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 6 * sizeof(float));
+		VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 3 * sizeof(float));
 		VertexBufferLayout VoxelVertexBufferLayout;
 		IndexBuffer VoxelIndexBuffer(Mesh::Cube::Indices, Mesh::Cube::NumberOfIndices);
 
-		VoxelVertexBufferLayout.Push<float>(3);
 		VoxelVertexBufferLayout.Push<float>(3);
 		VoxelVertexArray.AddBuffer(VoxelVertexBuffer, VoxelVertexBufferLayout);
 
@@ -416,8 +329,7 @@ int main(void)
 		//-----------------------------------------------
 		//		Loop variables
 		//
-		glm::mat4 viewMat;
-		glm::mat4 projMat;
+
 		glm::mat4 mvp;
 
 
@@ -431,9 +343,8 @@ int main(void)
 			//		Update
 			//
 
-			HandleCameraInput();
-
-
+			mMainCamera.OnTickUpdate();
+			mMainCamera.HandleInput(mKeys);
 
 			//-----------------------------------------------
 			//		Render
@@ -441,14 +352,10 @@ int main(void)
 
 			mRenderer.Clear();
 
-			// Math
-			viewMat = GetViewMat();
-			projMat = GetProjectionMat();
-			
-			// Draw light sources
+				// Draw light sources
 			mLightSourceShader.Bind();
 
-			mvp = projMat * viewMat * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
+			mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
 
 			mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 			mLightSourceShader.SetUniform3f("u_Color", mLightColor.x, mLightColor.y, mLightColor.z);
@@ -462,7 +369,7 @@ int main(void)
 
 			for (Entity& voxel : mVoxels)
 			{
-				mvp = projMat * viewMat * voxel.GetComponent<TransformComponent>()->GetTransformMat();
+				mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * voxel.GetComponent<TransformComponent>()->GetTransformMat();
 				glm::vec3 voxelPosition = voxel.GetComponent<TransformComponent>()->GetPosition();
 
 				mVoxelShader.SetUniformMat4f("u_MVP", mvp);

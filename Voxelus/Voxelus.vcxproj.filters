@@ -66,6 +66,9 @@
     <ClCompile Include="src\scene\ECS\components\MaterialComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\ECS\entities\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Voxel.shader" />
@@ -124,6 +127,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\ECS\components\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\ECS\entities\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
