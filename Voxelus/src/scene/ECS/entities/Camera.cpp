@@ -8,9 +8,12 @@ namespace
 {
 	const glm::vec3 StartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
 
-	const float MovementSpeed = 1.5f;
+	const float MovementSpeed = 100.0f;
 	const float ShiftMultiplier = 2.0f;
-	const float RotationSpeed = 1.0f;
+	const float RotationDegSpeed = 120.0f;
+
+	const float StartYaw = -90.0f;
+	const float StartPitch = 0.0f;
 }
 
 /////////////////////////////////////////////////
@@ -24,7 +27,9 @@ namespace
 //
 
 Camera::Camera()
-	: Entity()
+	: mYaw(StartYaw)
+	, mPitch(StartPitch)
+	, Entity()
 {
 	mCachedViewMatrix = glm::mat4(1.0f);
 	mCachedProjectionMatrix = glm::mat4(1.0f);
@@ -67,11 +72,6 @@ void Camera::OnTickUpdate()
 		GetComponent<CameraComponent>()->GetUp());
 
 	mCachedProjectionMatrix = GetComponent<CameraComponent>()->GetProjectionMat();
-
-	// Update math
-	std::shared_ptr<TransformComponent> transformComp = GetComponent<TransformComponent>();
-	std::shared_ptr<CameraComponent> cameraComp = GetComponent<CameraComponent>();
-	//cameraComp->SetLookDirection(glm::rotate(cameraComp->GetLookDirection(), transformComp->GetRotation()));
 }
 
 //-----------------------------------------------
@@ -80,7 +80,7 @@ void Camera::OnTickUpdate()
 
 void Camera::HandleInput(bool* keys)
 {
-	float cameraSpeed = MovementSpeed;
+	float cameraSpeed = MovementSpeed * Time::DeltaTime;
 	if (keys[GLFW_KEY_LEFT_SHIFT])
 		cameraSpeed *= ShiftMultiplier;
 
@@ -100,17 +100,47 @@ void Camera::HandleInput(bool* keys)
 	if (keys[GLFW_KEY_X])
 		transformComp->SetPosition(transformComp->GetPosition() + cameraSpeed * cameraComp->GetUp());
 
-	float rotationSpeed = 1.0f; // deg
+	float rotationSpeed = RotationDegSpeed * Time::DeltaTime;
 	if (keys[GLFW_KEY_Q])
 	{
-		glm::vec3 currentRotation = transformComp->GetRotation();
-		currentRotation.y += rotationSpeed;
-		currentRotation.y = static_cast<int>(currentRotation.y) % 365;
-		transformComp->SetRotation(currentRotation);
+		//glm::vec3 currentRotation = transformComp->GetRotation();
+		//currentRotation.y += rotationSpeed;
+		////currentRotation.y = static_cast<int>(currentRotation.y) % 365;
+		//transformComp->SetRotation(currentRotation);
+		//std::cout << " Rotation = " << transformComp->GetRotation().x << "  " << transformComp->GetRotation().y << "  " << transformComp->GetRotation().z << std::endl;
+		
+		cameraComp->SetLookDirection(glm::rotateY(cameraComp->GetLookDirection(), glm::radians(rotationSpeed)));
+		//std::cout << " Look dir = " << cameraComp->GetLookDirection().x << "  " << cameraComp->GetLookDirection().y << "  " << cameraComp->GetLookDirection().z << std::endl;
 	}
-	//cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() - cameraSpeed * cameraCameraComp->GetUp());
-	//if (mKeys[GLFW_KEY_E])
-	//	cameraTransformComp->SetPosition(cameraTransformComp->GetPosition() + cameraSpeed * cameraCameraComp->GetUp());
+	if (keys[GLFW_KEY_E])
+	{
+		cameraComp->SetLookDirection(glm::rotateY(cameraComp->GetLookDirection(), -glm::radians(rotationSpeed)));
+	}
+
+
+	if (Mouse::Button == GLFW_MOUSE_BUTTON_MIDDLE && Mouse::Action == GLFW_PRESS)
+	{
+		// Update rotation
+		mYaw += Mouse::OffsetX;
+		mPitch += Mouse::OffsetY;
+
+		if (mPitch > 89.0f)
+		{
+			mPitch = 89.0f;
+		}
+		if (mPitch < -89.0f)
+		{
+			mPitch = -89.0f;
+		}
+		glm::vec3 newLookDirection;
+		newLookDirection.x = cos(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		newLookDirection.y = sin(glm::radians(mPitch));
+		newLookDirection.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		cameraComp->SetLookDirection(glm::normalize(newLookDirection));
+
+		Mouse::OffsetX = 0.0f;
+		Mouse::OffsetY = 0.0f;
+	}
 }
 
 

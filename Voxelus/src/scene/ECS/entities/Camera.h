@@ -43,6 +43,15 @@ public:
 	void HandleInput(bool* keys);
 
 private:
+	/////////////////////////////////////////////////
+	// 
+	//		Variables
+	//
+	/////////////////////////////////////////////////
+
 	glm::mat4 mCachedViewMatrix;
 	glm::mat4 mCachedProjectionMatrix;
+
+	float mYaw;
+	float mPitch;
 };

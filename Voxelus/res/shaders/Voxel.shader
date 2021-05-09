@@ -4,8 +4,8 @@
 layout(location = 0) in vec4 position;
 
 uniform mat4 u_MVP;
-uniform vec3 u_Center;
-uniform float u_HalfWidth;
+//uniform vec3 u_Center;
+//uniform float u_HalfWidth;
 
 void main()
 {
