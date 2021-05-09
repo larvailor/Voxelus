@@ -137,7 +137,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BatchRenderer.cpp" />
     <ClCompile Include="src\core\Service.cpp" />
+    <ClCompile Include="src\DynamicVertexBuffer.cpp" />
     <ClCompile Include="src\scene\ECS\components\BaseComponent.cpp" />
     <ClCompile Include="src\scene\ECS\components\CameraComponent.cpp" />
     <ClCompile Include="src\scene\ECS\components\MaterialComponent.cpp" />
@@ -162,13 +164,17 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\Floor.shader" />
     <None Include="res\shaders\LightSource.shader" />
     <None Include="res\shaders\Voxel.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BatchRenderer.h" />
+    <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\core\Mouse.h" />
     <ClInclude Include="src\core\Service.h" />
     <ClInclude Include="src\core\Time.h" />
+    <ClInclude Include="src\DynamicVertexBuffer.h" />
     <ClInclude Include="src\scene\ECS\components\BaseComponent.h" />
     <ClInclude Include="src\scene\ECS\components\CameraComponent.h" />
     <ClInclude Include="src\scene\ECS\components\Components.h" />
@@ -185,6 +191,7 @@
     <ClInclude Include="src\stdfax.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\vendor\stb_image\stb_image.h" />
+    <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VertexBufferLayout.h" />

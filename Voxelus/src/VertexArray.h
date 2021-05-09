@@ -2,6 +2,7 @@
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
+#include "DynamicVertexBuffer.h"
 
 class VertexArray
 {
@@ -29,6 +30,7 @@ public:
 	//
 
 	void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
+	void AddDynamicBuffer(const DynamicVertexBuffer& vb, const VertexBufferLayout& layout);
 
 	void Bind() const;
 	void Unbind() const;

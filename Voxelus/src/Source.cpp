@@ -1,15 +1,17 @@
 #include "stdfax.h"
 
-#include "Renderer.h"
-#include "VertexArray.h"
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "BatchRenderer.h"
+
+#include "VertexArray.h"
+#include "DynamicVertexBuffer.h"
+#include "VertexBufferLayout.h"
+#include "IndexBuffer.h"
 
 #include "ECS/components/Components.h"
 #include "ECS/entities/Camera.h"
+#include "ECS/entities/Voxel.h"
 
 #include "World.h"
 
@@ -33,30 +35,6 @@ int Mouse::Mods = 0;
 //
 /////////////////////////////////////////////////
 
-namespace InitConstants
-{
-	namespace Window
-	{
-		const float Width = 1280;
-		const float Height = 720;
-	}
-
-	namespace Light
-	{
-		const std::string PathToShader = "res/shaders/LightSource.shader";
-
-		const glm::vec3 Position = glm::vec3(10.0f, 25.0f, 0.0f);
-		const glm::vec3 Color = glm::vec3(0.2f, 0.2f, 1.0f);
-	}
-
-	namespace Voxel
-	{
-		const std::string PathToShader = "res/shaders/Voxel.shader";
-
-		const glm::vec3 Color = glm::vec3(1.0f, 0.4f, 0.4f);
-	}
-}
-
 namespace Mesh
 {
 	namespace Plane
@@ -72,36 +50,36 @@ namespace Mesh
 			0, 1, 2,
 			2, 3, 0
 		};
-	};
+	}
 
-	namespace Cube
-	{
-		//	    1 - - -  0
-		//	  / .      / |
-		//	3  -.- - 2   |
-		//	|   6 . .|.  4
-		//	| .`     | /
-		//	6 - - -  7
+	//namespace Cube
+	//{
+	//	//	    1 - - -  0
+	//	//	  / .      / |
+	//	//	3  -.- - 2   |
+	//	//	|   6 . .|.  4
+	//	//	| .`     | /
+	//	//	6 - - -  7
 
-		const float HalfWidth = 10.0f;
-		unsigned int NumberOfVertices = 8;
-		float Vertices[] = {
-			// x, y, z
-			 HalfWidth,  HalfWidth, -HalfWidth,
-			-HalfWidth,  HalfWidth, -HalfWidth,
-			 HalfWidth,  HalfWidth,  HalfWidth,
-			-HalfWidth,  HalfWidth,  HalfWidth,
-			 HalfWidth, -HalfWidth, -HalfWidth,
-			-HalfWidth, -HalfWidth, -HalfWidth,
-			-HalfWidth, -HalfWidth,  HalfWidth,
-			 HalfWidth, -HalfWidth,  HalfWidth
-		};
+	//	const float HalfWidth = 10.0f;
+	//	unsigned int NumberOfVertices = 8;
+	//	float Vertices[] = {
+	//		// x, y, z
+	//		 HalfWidth,  HalfWidth, -HalfWidth,
+	//		-HalfWidth,  HalfWidth, -HalfWidth,
+	//		 HalfWidth,  HalfWidth,  HalfWidth,
+	//		-HalfWidth,  HalfWidth,  HalfWidth,
+	//		 HalfWidth, -HalfWidth, -HalfWidth,
+	//		-HalfWidth, -HalfWidth, -HalfWidth,
+	//		-HalfWidth, -HalfWidth,  HalfWidth,
+	//		 HalfWidth, -HalfWidth,  HalfWidth
+	//	};
 
-		unsigned int NumberOfIndices = 14;
-		unsigned int Indices[] = {
-			3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0
-		};
-	};
+	//	unsigned int NumberOfIndices = 14;
+	//	unsigned int Indices[] = {
+	//		3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0
+	//	};
+	//};
 
 	namespace LightSource
 	{
@@ -129,11 +107,8 @@ namespace Mesh
 		unsigned int Indices[] = {
 			3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0
 		};
-	};
-
+	}
 }
-
-
 
 /////////////////////////////////////////////////
 // 
@@ -141,7 +116,7 @@ namespace Mesh
 //
 /////////////////////////////////////////////////
 
-World mWorld;
+World mWorld(InitConstants::World::MaxSizeX, InitConstants::World::MaxSizeY, InitConstants::World::MaxSizeZ);
 
 //-----------------------------------------------
 //		Entities
@@ -150,20 +125,19 @@ World mWorld;
 Camera mMainCamera;
 
 //-----------------------------------------------
+//		Shaders
+//
+
+Shader mVoxelShader;
+Shader mLightSourceShader;
+
+//-----------------------------------------------
 //		Light
 //
 
 Entity mLightSource;
 
-Shader mLightSourceShader;
-
 glm::vec3 mLightColor;
-
-//-----------------------------------------------
-//		Voxel
-//
-
-Shader mVoxelShader;
 
 //-----------------------------------------------
 //		Render
@@ -184,24 +158,7 @@ bool mKeys[1024];
 /////////////////////////////////////////////////
 
 //-----------------------------------------------
-//		Light
-//
-
-void InitLightSourceShader()
-{
-	mLightSourceShader.Initialize(InitConstants::Light::PathToShader);
-}
-
-void InitLight()
-{
-	InitLightSourceShader();
-	mLightColor = InitConstants::Light::Color;
-
-	mLightSource.GetComponent<TransformComponent>()->SetPosition(InitConstants::Light::Position);
-}
-
-//-----------------------------------------------
-//		Voxels
+//		Shaders
 //
 
 void InitVoxelShader()
@@ -214,14 +171,23 @@ void InitVoxelShader()
 	mVoxelShader.Unbind();
 }
 
-void InitVoxel()
+void InitLightSourceShader()
 {
-	InitVoxelShader();
+	mLightSourceShader.Initialize(InitConstants::Light::PathToShader);
 }
 
 //-----------------------------------------------
-//		Floor
+//		Light
 //
+
+void InitLight()
+{
+	InitLightSourceShader();
+	mLightColor = glm::vec3(1.0f, 0.2f, 0.2f);
+
+	mLightSource.GetComponent<TransformComponent>()->SetPosition(glm::vec3(InitConstants::Light::PositionX, InitConstants::Light::PositionY, InitConstants::Light::PositionZ));
+}
+
 
 //-----------------------------------------------
 //		Input
@@ -244,13 +210,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	Mouse::OffsetX = (xpos - Mouse::LastFrameXpos) * Mouse::Sensitivity;
-	Mouse::OffsetY = (Mouse::LastFrameYpos - ypos) * Mouse::Sensitivity;
+	Mouse::OffsetX = (static_cast<float>(xpos) - Mouse::LastFrameXpos) * Mouse::Sensitivity;
+	Mouse::OffsetY = (Mouse::LastFrameYpos - static_cast<float>(ypos)) * Mouse::Sensitivity;
 
-	Mouse::LastFrameXpos = xpos;
-	Mouse::LastFrameYpos = ypos;
-
-	//std::cout << Mouse::OffsetX << "  " << Mouse::OffsetY << std::endl;
+	Mouse::LastFrameXpos = static_cast<float>(xpos);
+	Mouse::LastFrameYpos = static_cast<float>(ypos);
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -279,7 +243,6 @@ void InitKeyboard(GLFWwindow* window)
 {
 	glfwSetKeyCallback(window, KeyCallback);
 }
-
 
 //-----------------------------------------------
 //		Main
@@ -349,9 +312,13 @@ int main(void)
 		InitMouse(window);
 		InitKeyboard(window);
 		InitLight();
-		InitVoxel();
+		InitVoxelShader();
+		BatchRenderer::Init();
 
-			// Light source buffers
+
+		
+
+			 //Light source buffers
 		VertexArray LightSourceVertexArray;
 		VertexBuffer LightSourceVertexBuffer(Mesh::LightSource::Vertices, Mesh::LightSource::NumberOfVertices * 3 * sizeof(float));
 		VertexBufferLayout LightSourceVertexBufferLayout;
@@ -363,30 +330,27 @@ int main(void)
 		LightSourceVertexArray.Unbind();
 		LightSourceVertexBuffer.Unbind();
 		LightSourceIndexBuffer.Unbind();
-			//
+			
 		
-			// Voxel buffers
-		VertexArray VoxelVertexArray;
-		VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 3 * sizeof(float));
-		VertexBufferLayout VoxelVertexBufferLayout;
-		IndexBuffer VoxelIndexBuffer(Mesh::Cube::Indices, Mesh::Cube::NumberOfIndices);
+		//	// Voxel buffers
+		//VertexArray VoxelVertexArray;
+		//VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 3 * sizeof(float));
+		//VertexBufferLayout VoxelVertexBufferLayout;
+		//IndexBuffer VoxelIndexBuffer(Mesh::Cube::Indices, Mesh::Cube::NumberOfIndices);
 
-		VoxelVertexBufferLayout.Push<float>(3);
-		VoxelVertexArray.AddBuffer(VoxelVertexBuffer, VoxelVertexBufferLayout);
+		//VoxelVertexBufferLayout.Push<float>(3);
+		//VoxelVertexArray.AddBuffer(VoxelVertexBuffer, VoxelVertexBufferLayout);
 
-		VoxelVertexArray.Unbind();
-		VoxelVertexBuffer.Unbind();
-		VoxelIndexBuffer.Unbind();
-			//
-
+		//VoxelVertexArray.Unbind();
+		//VoxelVertexBuffer.Unbind();
+		//VoxelIndexBuffer.Unbind();
+		//	//
 
 		//-----------------------------------------------
 		//		Loop variables
 		//
 
-		glm::mat4 mvp;
-
-
+		
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -427,27 +391,34 @@ int main(void)
 
 			mRenderer.Clear();
 
-				// Draw light sources
+			BatchRenderer::BeginBatch();
+			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
+			{
+				BatchRenderer::DrawCube(
+					voxel->GetComponent<TransformComponent>()->GetPosition(),
+					voxel->GetSize(),
+					voxel->GetColor()
+				);
+			}
+			BatchRenderer::EndBatch();
+
+			mVoxelShader.Bind();
+			glm::mat4 viewProjMat = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix();
+			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
+			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+
+			BatchRenderer::Flush();
+			mVoxelShader.Unbind();
+
+				 //Draw light sources
 			mLightSourceShader.Bind();
 
-			mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
+			glm::mat4 mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
 
 			mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 			mLightSourceShader.SetUniform3f("u_Color", mLightColor.x, mLightColor.y, mLightColor.z);
 
 			mRenderer.Draw(LightSourceVertexArray, LightSourceIndexBuffer);
-
-				// Draw floor
-			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
-			{
-				mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * voxel->GetComponent<TransformComponent>()->GetTransformMat();
-				glm::vec3 voxelColor = voxel->GetColor();
-
-				mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
-				mLightSourceShader.SetUniform3f("u_Color", voxelColor.x, voxelColor.y, voxelColor.z);
-
-				mRenderer.Draw(VoxelVertexArray, VoxelIndexBuffer);
-			}
 
 			mLightSourceShader.Unbind();
 
@@ -455,6 +426,13 @@ int main(void)
 			GLCall(glfwSwapBuffers(window));
 		}
 	}
+
+
+	//-----------------------------------------------
+	//		Deinitialize
+	//
+
+	BatchRenderer::DeInit();
 
 	glfwTerminate();
 	return 0;

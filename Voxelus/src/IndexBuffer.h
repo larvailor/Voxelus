@@ -13,6 +13,7 @@ public:
 	//		Constructors
 	//
 
+	IndexBuffer();
 	IndexBuffer(const unsigned int* data, unsigned int count);
 	
 	//-----------------------------------------------
@@ -20,6 +21,12 @@ public:
 	//
 	
 	~IndexBuffer();
+
+	//-----------------------------------------------
+	//		Initialization
+	//
+
+	void Init(const unsigned int* data, unsigned int count);
 
 	//-----------------------------------------------
 	//		Getters
