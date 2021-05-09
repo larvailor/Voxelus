@@ -1,15 +1,18 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec4 position;
+layout(location = 0) in vec3 i_Position;
+layout(location = 1) in vec4 i_Color;
 
-uniform mat4 u_MVP;
-//uniform vec3 u_Center;
-//uniform float u_HalfWidth;
+uniform mat4 u_ViewProj;
+uniform mat4 u_Transform;
+
+out vec4 v_Color;
 
 void main()
 {
-	gl_Position = u_MVP * position;
+	v_Color = i_Color;
+	gl_Position = u_ViewProj * u_Transform * vec4(i_Position, 1.0f);
 }
 
 
@@ -17,12 +20,11 @@ void main()
 #shader fragment
 #version 330 core
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 o_Color;
 
-uniform vec3 u_LightColor;
-uniform vec3 u_Color;
+in vec4 v_Color;
 
 void main()
 {
-	gl_FragColor = vec4(u_LightColor * u_Color, 1.0f);
+	o_Color = v_Color;
 }

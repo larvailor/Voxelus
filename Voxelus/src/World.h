@@ -15,7 +15,7 @@ public:
 	//		Constructors
 	//
 
-	World();
+	World(unsigned int maxSizeX, unsigned int maxSizeY, unsigned int maxSizeZ);
 
 	//-----------------------------------------------
 	//		Destructors

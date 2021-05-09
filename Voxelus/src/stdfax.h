@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Constants.h"
 #include "core/Service.h"
 #include "core/Time.h"
 #include "core/Mouse.h"
@@ -10,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include <map>
 

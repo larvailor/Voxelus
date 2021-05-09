@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Entity.h"
-
-class Voxel : public Entity
+class DynamicVertexBuffer
 {
 public:
 	/////////////////////////////////////////////////
@@ -15,26 +13,33 @@ public:
 	//		Constructors
 	//
 
-	Voxel();
+	DynamicVertexBuffer();
+	DynamicVertexBuffer(unsigned int size);
 
 	//-----------------------------------------------
 	//		Destructors
 	//
 
-	~Voxel();
+	~DynamicVertexBuffer();
 
 	//-----------------------------------------------
-	//		Getters
+	//		Initialization
 	//
-	
-	glm::vec4 GetColor() const;
-	glm::vec3 GetSize() const;
+
+	void Init(unsigned int size);
 	
 	//-----------------------------------------------
 	//		Setters
 	//
 
-	void SetColor(glm::vec4 color);
+	void SetBufferSubData(unsigned int size, const void* data);
+	
+	//-----------------------------------------------
+	//		Else
+	//
+
+	void Bind() const;
+	void Unbind() const;
 
 private:
 	/////////////////////////////////////////////////
@@ -43,6 +48,5 @@ private:
 	//
 	/////////////////////////////////////////////////
 
-	glm::vec4 mColor;
-	glm::vec3 mSize;
+	unsigned int mRendererId;
 };

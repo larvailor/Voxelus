@@ -14,7 +14,8 @@
 //
 
 Voxel::Voxel()
-	: mColor(glm::vec3(1.0f, 1.0f, 1.0f))
+	: mColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
+	, mSize(glm::vec3(InitConstants::Voxel::WidthX, InitConstants::Voxel::WidthY, InitConstants::Voxel::WidthZ))
 	, Entity()
 {
 }
@@ -31,16 +32,21 @@ Voxel::~Voxel()
 //		Getters
 //
 
-glm::vec3 Voxel::GetColor() const
+glm::vec4 Voxel::GetColor() const
 {
 	return mColor;
+}
+
+glm::vec3 Voxel::GetSize() const
+{
+	return mSize;
 }
 
 //-----------------------------------------------
 //		Setters
 //
 
-void Voxel::SetColor(glm::vec3 color)
+void Voxel::SetColor(glm::vec4 color)
 {
 	mColor = color;
 }
