@@ -164,7 +164,9 @@
     <None Include="res\shaders\Voxel.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\Mouse.h" />
     <ClInclude Include="src\core\Service.h" />
+    <ClInclude Include="src\core\Time.h" />
     <ClInclude Include="src\scene\ECS\components\BaseComponent.h" />
     <ClInclude Include="src\scene\ECS\components\CameraComponent.h" />
     <ClInclude Include="src\scene\ECS\components\Components.h" />

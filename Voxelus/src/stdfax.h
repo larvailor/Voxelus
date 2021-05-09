@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/Service.h"
+#include "core/Time.h"
+#include "core/Mouse.h"
 
 #include <iostream>
 #include <memory>
@@ -15,6 +17,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 

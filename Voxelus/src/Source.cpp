@@ -14,6 +14,18 @@
 
 unsigned int Entity::NextEntityId = 1;
 
+float Time::DeltaTime = 0.0f;
+float Time::LastFrameTime = 0.0f;
+
+float Mouse::OffsetX = 0.0f;
+float Mouse::OffsetY = 0.0f;
+float Mouse::LastFrameXpos = 0.0f;
+float Mouse::LastFrameYpos = 0.0f;
+float Mouse::Sensitivity = 0.2f;
+int Mouse::Button = 0;
+int Mouse::Action = 0;
+int Mouse::Mods = 0;
+
 /////////////////////////////////////////////////
 // 
 //		Constants
@@ -22,6 +34,12 @@ unsigned int Entity::NextEntityId = 1;
 
 namespace InitConstants
 {
+	namespace Window
+	{
+		const float Width = 1280;
+		const float Height = 720;
+	}
+
 	namespace Light
 	{
 		const std::string PathToShader = "res/shaders/LightSource.shader";
@@ -161,7 +179,6 @@ Renderer mRenderer;
 
 bool mKeys[1024];
 
-
 /////////////////////////////////////////////////
 // 
 //		Methods
@@ -194,7 +211,7 @@ void InitVoxelShader()
 	mVoxelShader.Initialize(InitConstants::Voxel::PathToShader);
 
 	mVoxelShader.Bind();
-	mVoxelShader.SetUniform1f("u_HalfWidth", Mesh::Cube::HalfWidth);
+	//mVoxelShader.SetUniform1f("u_HalfWidth", Mesh::Cube::HalfWidth);
 	mVoxelShader.SetUniform3f("u_LightColor", mLightColor.x, mLightColor.y, mLightColor.z);
 	mVoxelShader.Unbind();
 }
@@ -228,6 +245,44 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+void MouseCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	Mouse::OffsetX = (xpos - Mouse::LastFrameXpos) * Mouse::Sensitivity;
+	Mouse::OffsetY = (Mouse::LastFrameYpos - ypos) * Mouse::Sensitivity;
+
+	Mouse::LastFrameXpos = xpos;
+	Mouse::LastFrameYpos = ypos;
+
+	//std::cout << Mouse::OffsetX << "  " << Mouse::OffsetY << std::endl;
+}
+
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	Mouse::Button = button;
+	Mouse::Action = action;
+	Mouse::Mods = mods;
+}
+
+void InitMouse(GLFWwindow* window)
+{
+	glfwSetCursorPosCallback(window, MouseCallback);
+	glfwSetMouseButtonCallback(window, MouseButtonCallback);
+	glfwSetCursorPos(window, static_cast<double>(InitConstants::Window::Width / 2.0f), static_cast<double>(InitConstants::Window::Height / 2.0f));
+
+	double cursorXpos, cursorYpos;
+	glfwGetCursorPos(window, &cursorXpos, &cursorYpos);
+	Mouse::LastFrameXpos = static_cast<float>(cursorXpos);
+	Mouse::LastFrameYpos = static_cast<float>(cursorYpos);
+
+	Mouse::OffsetX = 0.0f;
+	Mouse::OffsetY = 0.0f;
+}
+
+void InitKeyboard(GLFWwindow* window)
+{
+	glfwSetKeyCallback(window, KeyCallback);
+}
+
 
 //-----------------------------------------------
 //		Main
@@ -246,7 +301,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(1280, 720, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(InitConstants::Window::Width, InitConstants::Window::Height, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -257,8 +312,6 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glEnable(GL_DEPTH_TEST);
-
-	glfwSetKeyCallback(window, KeyCallback);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -293,7 +346,9 @@ int main(void)
 		//-----------------------------------------------
 		//		Initialization
 		//
-
+		
+		InitMouse(window);
+		InitKeyboard(window);
 		InitLight();
 		InitVoxel();
 
@@ -343,6 +398,27 @@ int main(void)
 			//		Update
 			//
 
+				// Delta time
+			float time = static_cast<float>(glfwGetTime());
+			Time::DeltaTime = time - Time::LastFrameTime;
+			Time::LastFrameTime = time;
+			//std::cout << "DeltaTime = " << Timer::DeltaTime << std::endl;
+
+				// Mouse
+
+			if (Mouse::Button == GLFW_MOUSE_BUTTON_MIDDLE)
+			{
+				if (Mouse::Action == GLFW_PRESS)
+				{
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				}
+				else if (Mouse::Action == GLFW_RELEASE)
+				{
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+			}
+
+				// Camera
 			mMainCamera.OnTickUpdate();
 			mMainCamera.HandleInput(mKeys);
 
@@ -373,7 +449,7 @@ int main(void)
 				glm::vec3 voxelPosition = voxel.GetComponent<TransformComponent>()->GetPosition();
 
 				mVoxelShader.SetUniformMat4f("u_MVP", mvp);
-				mVoxelShader.SetUniform3f("u_Center", voxelPosition.x, voxelPosition.y, voxelPosition.z);
+				//mVoxelShader.SetUniform3f("u_Center", voxelPosition.x, voxelPosition.y, voxelPosition.z);
 				mVoxelShader.SetUniform3f("u_Color", mVoxelColor.x, mVoxelColor.y, mVoxelColor.z);
 
 				mRenderer.Draw(VoxelVertexArray, VoxelIndexBuffer);
