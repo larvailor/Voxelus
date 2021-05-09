@@ -10,7 +10,7 @@ namespace
 	unsigned int SizeY = 16;
 	unsigned int SizeZ = 32;
 
-	glm::vec3 DarkGrey = glm::vec3(0.2f, 0.2f, 0.2f);
+	glm::vec3 DarkGrey = glm::vec3(0.7f, 0.7f, 0.7f);
 	glm::vec3 LightGrey = glm::vec3(0.8f, 0.8f, 0.8f);
 }
 
@@ -76,7 +76,7 @@ void World::GenerateFloor()
 		for (unsigned int z = 0; z < mSizeZ; z++)
 		{
 			std::shared_ptr<Voxel> floorVoxel = std::make_shared<Voxel>();
-			floorVoxel->SetColor(blackVoxel ? glm::vec3(0.2f, 0.2f, 0.2f) : glm::vec3(0.9f, 0.9f, 0.9f));
+			floorVoxel->SetColor(blackVoxel ? glm::vec3(0.7f, 0.7f, 0.7f) : glm::vec3(0.9f, 0.9f, 0.9f));
 			blackVoxel = !blackVoxel;
 
 			offsetZ = z * voxelWidth + voxelHalfWidth;

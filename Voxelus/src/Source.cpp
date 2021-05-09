@@ -384,7 +384,8 @@ int main(void)
 		//		Loop variables
 		//
 
-		// ...
+		glm::mat4 mvp;
+
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
@@ -429,10 +430,9 @@ int main(void)
 				// Draw light sources
 			mLightSourceShader.Bind();
 
-			mLightSourceShader.SetUniformMat4f("u_Model", mLightSource.GetComponent<TransformComponent>()->GetTransformMat());
-			mLightSourceShader.SetUniformMat4f("u_View", mMainCamera.GetViewMatrix());
-			mLightSourceShader.SetUniformMat4f("u_Projection", mMainCamera.GetProjectionMatrix());
+			mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
 
+			mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 			mLightSourceShader.SetUniform3f("u_Color", mLightColor.x, mLightColor.y, mLightColor.z);
 
 			mRenderer.Draw(LightSourceVertexArray, LightSourceIndexBuffer);
@@ -440,12 +440,10 @@ int main(void)
 				// Draw floor
 			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
 			{
+				mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * voxel->GetComponent<TransformComponent>()->GetTransformMat();
 				glm::vec3 voxelColor = voxel->GetColor();
 
-				mLightSourceShader.SetUniformMat4f("u_Model", voxel->GetComponent<TransformComponent>()->GetTransformMat());
-				mLightSourceShader.SetUniformMat4f("u_View", mMainCamera.GetViewMatrix());
-				mLightSourceShader.SetUniformMat4f("u_Projection", mMainCamera.GetProjectionMatrix());
-
+				mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 				mLightSourceShader.SetUniform3f("u_Color", voxelColor.x, voxelColor.y, voxelColor.z);
 
 				mRenderer.Draw(VoxelVertexArray, VoxelIndexBuffer);
