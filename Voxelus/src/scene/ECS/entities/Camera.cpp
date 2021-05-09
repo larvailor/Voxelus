@@ -6,7 +6,7 @@
 
 namespace
 {
-	const glm::vec3 StartPosition = glm::vec3(0.0f, 0.0f, 100.0f);
+	const glm::vec3 StartPosition = glm::vec3(320.0f, 150.0f, 800.0f);
 
 	const float MovementSpeed = 100.0f;
 	const float ShiftMultiplier = 2.0f;

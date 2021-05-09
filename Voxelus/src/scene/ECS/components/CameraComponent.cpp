@@ -5,7 +5,7 @@
 namespace
 {
 	const float cStartNearPlane   = 0.01f;
-	const float cStartFarPlane    = 1000.0f;
+	const float cStartFarPlane    = 2000.0f;
 	const float cStartFieldOfView = 60.0f;
 
 	const glm::vec3 cStartLookDirection = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
