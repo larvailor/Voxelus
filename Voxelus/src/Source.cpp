@@ -9,8 +9,9 @@
 #include "Renderer.h"
 
 #include "ECS/components/Components.h"
-#include "ECS/entities/Entity.h"
 #include "ECS/entities/Camera.h"
+
+#include "World.h"
 
 unsigned int Entity::NextEntityId = 1;
 
@@ -140,14 +141,13 @@ namespace Mesh
 //
 /////////////////////////////////////////////////
 
+World mWorld;
+
 //-----------------------------------------------
 //		Entities
 //
 
 Camera mMainCamera;
-
-std::vector<Entity> mVoxels;
-std::vector<Entity> mFloor;
 
 //-----------------------------------------------
 //		Light
@@ -164,8 +164,6 @@ glm::vec3 mLightColor;
 //
 
 Shader mVoxelShader;
-
-glm::vec3 mVoxelColor;
 
 //-----------------------------------------------
 //		Render
@@ -219,7 +217,6 @@ void InitVoxelShader()
 void InitVoxel()
 {
 	InitVoxelShader();
-	mVoxelColor = InitConstants::Voxel::Color;
 }
 
 //-----------------------------------------------
@@ -299,6 +296,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(InitConstants::Window::Width, InitConstants::Window::Height, "Hello World", NULL, NULL);
@@ -312,6 +310,7 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -326,22 +325,22 @@ int main(void)
 		//-----------------------------------------------
 		//		Test stuff
 		//
-		Entity plane1;
-		mVoxels.push_back(plane1);
+		//Entity plane1;
+		//mVoxels.push_back(plane1);
 
-		Entity plane2;
-		std::shared_ptr<TransformComponent> transformComponent2 = plane2.GetComponent<TransformComponent>();
-		////transformComponent->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
-		////transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
-		transformComponent2->SetPosition(glm::vec3(-25.0f, 0.0f, 0.0f));
-		mVoxels.push_back(plane2);
+		//Entity plane2;
+		//std::shared_ptr<TransformComponent> transformComponent2 = plane2.GetComponent<TransformComponent>();
+		//////transformComponent->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		//////transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
+		//transformComponent2->SetPosition(glm::vec3(-25.0f, 0.0f, 0.0f));
+		//mVoxels.push_back(plane2);
 
-		Entity plane3;
-		std::shared_ptr<TransformComponent> transformComponent3 = plane3.GetComponent<TransformComponent>();
-		//transformComponent3->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
-		//transformComponent3->SetRotation(glm::vec3(0.0f, 30.0f, 0.0f));
-		transformComponent3->SetPosition(glm::vec3(-25.0f, 35.0f, 0.0f));
-		mVoxels.push_back(plane3);
+		//Entity plane3;
+		//std::shared_ptr<TransformComponent> transformComponent3 = plane3.GetComponent<TransformComponent>();
+		////transformComponent3->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+		////transformComponent3->SetRotation(glm::vec3(0.0f, 30.0f, 0.0f));
+		//transformComponent3->SetPosition(glm::vec3(-25.0f, 35.0f, 0.0f));
+		//mVoxels.push_back(plane3);
 
 		//-----------------------------------------------
 		//		Initialization
@@ -385,8 +384,7 @@ int main(void)
 		//		Loop variables
 		//
 
-		glm::mat4 mvp;
-
+		// ...
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
@@ -402,7 +400,7 @@ int main(void)
 			float time = static_cast<float>(glfwGetTime());
 			Time::DeltaTime = time - Time::LastFrameTime;
 			Time::LastFrameTime = time;
-			//std::cout << "DeltaTime = " << Timer::DeltaTime << std::endl;
+			std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
 				// Mouse
 
@@ -431,31 +429,29 @@ int main(void)
 				// Draw light sources
 			mLightSourceShader.Bind();
 
-			mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
+			mLightSourceShader.SetUniformMat4f("u_Model", mLightSource.GetComponent<TransformComponent>()->GetTransformMat());
+			mLightSourceShader.SetUniformMat4f("u_View", mMainCamera.GetViewMatrix());
+			mLightSourceShader.SetUniformMat4f("u_Projection", mMainCamera.GetProjectionMatrix());
 
-			mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 			mLightSourceShader.SetUniform3f("u_Color", mLightColor.x, mLightColor.y, mLightColor.z);
 
 			mRenderer.Draw(LightSourceVertexArray, LightSourceIndexBuffer);
 
-			mLightSourceShader.Unbind();
-
-				// Draw voxels
-			mVoxelShader.Bind();
-
-			for (Entity& voxel : mVoxels)
+				// Draw floor
+			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
 			{
-				mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * voxel.GetComponent<TransformComponent>()->GetTransformMat();
-				glm::vec3 voxelPosition = voxel.GetComponent<TransformComponent>()->GetPosition();
+				glm::vec3 voxelColor = voxel->GetColor();
 
-				mVoxelShader.SetUniformMat4f("u_MVP", mvp);
-				//mVoxelShader.SetUniform3f("u_Center", voxelPosition.x, voxelPosition.y, voxelPosition.z);
-				mVoxelShader.SetUniform3f("u_Color", mVoxelColor.x, mVoxelColor.y, mVoxelColor.z);
+				mLightSourceShader.SetUniformMat4f("u_Model", voxel->GetComponent<TransformComponent>()->GetTransformMat());
+				mLightSourceShader.SetUniformMat4f("u_View", mMainCamera.GetViewMatrix());
+				mLightSourceShader.SetUniformMat4f("u_Projection", mMainCamera.GetProjectionMatrix());
+
+				mLightSourceShader.SetUniform3f("u_Color", voxelColor.x, voxelColor.y, voxelColor.z);
 
 				mRenderer.Draw(VoxelVertexArray, VoxelIndexBuffer);
 			}
 
-			mVoxelShader.Unbind();
+			mLightSourceShader.Unbind();
 
 			/* Swap front and back buffers */
 			GLCall(glfwSwapBuffers(window));
