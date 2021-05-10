@@ -37,7 +37,7 @@ namespace
 
 void BatchRenderer::Init()
 {
-	batchRenderData.bufferStart = new Vertex[InitConstants::World::MaxVoxelCount];
+	batchRenderData.bufferStart = new Vertex[InitConstants::World::MaxVerticesCount];
 	batchRenderData.indices = new unsigned int[InitConstants::World::MaxIndicesCount];
 
 	//batchRenderData.dvb.Init(InitConstants::World::MaxVerticesCount * sizeof(Vertex));
@@ -46,11 +46,11 @@ void BatchRenderer::Init()
 	//batchRenderData.va.AddDynamicBuffer(batchRenderData.dvb, batchRenderData.vbl);
 
 	// Vertex array
-	GLCall(glGenVertexArrays(1, &batchRenderData.va));
+	GLCall(glCreateVertexArrays(1, &batchRenderData.va));
 	GLCall(glBindVertexArray(batchRenderData.va));
 
 	// Dynamic vertex buffer
-	GLCall(glGenBuffers(1, &batchRenderData.dvb));
+	GLCall(glCreateBuffers(1, &batchRenderData.dvb));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, batchRenderData.dvb));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, InitConstants::World::MaxVerticesCount * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW));
 
@@ -129,9 +129,9 @@ void BatchRenderer::Init()
 	}
 
 	// Index buffer
-	GLCall(glGenBuffers(1, &batchRenderData.ib));
+	GLCall(glCreateBuffers(1, &batchRenderData.ib));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchRenderData.ib));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(batchRenderData.indices), batchRenderData.indices, GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, InitConstants::World::MaxIndicesCount, batchRenderData.indices, GL_STATIC_DRAW));
 }
 
 void BatchRenderer::DeInit()
