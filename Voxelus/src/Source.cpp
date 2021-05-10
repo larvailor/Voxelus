@@ -286,26 +286,6 @@ int main(void)
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		//-----------------------------------------------
-		//		Test stuff
-		//
-		//Entity plane1;
-		//mVoxels.push_back(plane1);
-
-		//Entity plane2;
-		//std::shared_ptr<TransformComponent> transformComponent2 = plane2.GetComponent<TransformComponent>();
-		//////transformComponent->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
-		//////transformComponent->SetRotation(glm::vec3(89.0f, 0.0f, 0.0f));
-		//transformComponent2->SetPosition(glm::vec3(-25.0f, 0.0f, 0.0f));
-		//mVoxels.push_back(plane2);
-
-		//Entity plane3;
-		//std::shared_ptr<TransformComponent> transformComponent3 = plane3.GetComponent<TransformComponent>();
-		////transformComponent3->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
-		////transformComponent3->SetRotation(glm::vec3(0.0f, 30.0f, 0.0f));
-		//transformComponent3->SetPosition(glm::vec3(-25.0f, 35.0f, 0.0f));
-		//mVoxels.push_back(plane3);
-
-		//-----------------------------------------------
 		//		Initialization
 		//
 		
@@ -315,41 +295,22 @@ int main(void)
 		InitVoxelShader();
 		BatchRenderer::Init();
 
+			 // Base cube buffers
+		VertexArray baseCubeVA;
+		VertexBuffer baseCubeVB(Mesh::LightSource::Vertices, Mesh::LightSource::NumberOfVertices * 3 * sizeof(float));
+		VertexBufferLayout baseCubeVBL;
+		IndexBuffer baseCubeIB(Mesh::LightSource::Indices, Mesh::LightSource::NumberOfIndices);
 
-		
+		baseCubeVBL.Push<float>(3);
+		baseCubeVA.AddBuffer(baseCubeVB, baseCubeVBL);
 
-			 //Light source buffers
-		VertexArray LightSourceVertexArray;
-		VertexBuffer LightSourceVertexBuffer(Mesh::LightSource::Vertices, Mesh::LightSource::NumberOfVertices * 3 * sizeof(float));
-		VertexBufferLayout LightSourceVertexBufferLayout;
-		IndexBuffer LightSourceIndexBuffer(Mesh::LightSource::Indices, Mesh::LightSource::NumberOfIndices);
-
-		LightSourceVertexBufferLayout.Push<float>(3);
-		LightSourceVertexArray.AddBuffer(LightSourceVertexBuffer, LightSourceVertexBufferLayout);
-
-		LightSourceVertexArray.Unbind();
-		LightSourceVertexBuffer.Unbind();
-		LightSourceIndexBuffer.Unbind();
-			
-		
-		//	// Voxel buffers
-		//VertexArray VoxelVertexArray;
-		//VertexBuffer VoxelVertexBuffer(Mesh::Cube::Vertices, Mesh::Cube::NumberOfVertices * 3 * sizeof(float));
-		//VertexBufferLayout VoxelVertexBufferLayout;
-		//IndexBuffer VoxelIndexBuffer(Mesh::Cube::Indices, Mesh::Cube::NumberOfIndices);
-
-		//VoxelVertexBufferLayout.Push<float>(3);
-		//VoxelVertexArray.AddBuffer(VoxelVertexBuffer, VoxelVertexBufferLayout);
-
-		//VoxelVertexArray.Unbind();
-		//VoxelVertexBuffer.Unbind();
-		//VoxelIndexBuffer.Unbind();
-		//	//
+		baseCubeVA.Unbind();
+		baseCubeVB.Unbind();
+		baseCubeIB.Unbind();
 
 		//-----------------------------------------------
 		//		Loop variables
 		//
-
 		
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
@@ -391,6 +352,7 @@ int main(void)
 
 			mRenderer.Clear();
 
+				// Batch
 			BatchRenderer::BeginBatch();
 			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
 			{
@@ -410,7 +372,21 @@ int main(void)
 			BatchRenderer::Flush();
 			mVoxelShader.Unbind();
 
-				 //Draw light sources
+				// Draw coordinates directions
+			mLightSourceShader.Bind();
+			for (std::shared_ptr<Voxel> direction : mWorld.GetCoordinateDirections())
+			{
+				glm::mat4 mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * direction->GetComponent<TransformComponent>()->GetTransformMat();
+				glm::vec4 directionColor = direction->GetColor();
+
+				mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
+				mLightSourceShader.SetUniform3f("u_Color", directionColor.x, directionColor.y, directionColor.z);
+
+				mRenderer.Draw(baseCubeVA, baseCubeIB);
+			}
+			mLightSourceShader.Unbind();
+
+				// Draw light sources
 			mLightSourceShader.Bind();
 
 			glm::mat4 mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * mLightSource.GetComponent<TransformComponent>()->GetTransformMat();
@@ -418,7 +394,7 @@ int main(void)
 			mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
 			mLightSourceShader.SetUniform3f("u_Color", mLightColor.x, mLightColor.y, mLightColor.z);
 
-			mRenderer.Draw(LightSourceVertexArray, LightSourceIndexBuffer);
+			mRenderer.Draw(baseCubeVA, baseCubeIB);
 
 			mLightSourceShader.Unbind();
 

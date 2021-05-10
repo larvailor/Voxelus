@@ -50,3 +50,8 @@ void Voxel::SetColor(glm::vec4 color)
 {
 	mColor = color;
 }
+
+void Voxel::SetSize(glm::vec3 size)
+{
+	mSize = size;
+}

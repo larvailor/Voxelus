@@ -29,6 +29,7 @@ public:
 
 	std::vector<std::shared_ptr<Voxel>>& GetVoxels();
 	std::vector<std::shared_ptr<Voxel>>& GetFloor();
+	std::vector<std::shared_ptr<Voxel>>& GetCoordinateDirections();
 
 private:
 	/////////////////////////////////////////////////
@@ -42,6 +43,7 @@ private:
 	//
 
 	void GenerateFloor();
+	void GenerateCoordinateDirections();
 
 	/////////////////////////////////////////////////
 	// 
@@ -51,6 +53,7 @@ private:
 
 	std::vector<std::shared_ptr<Voxel>> mVoxels;
 	std::vector<std::shared_ptr<Voxel>> mFloor;
+	std::vector<std::shared_ptr<Voxel>> mCoordDirections;
 
 	unsigned int mSizeX;
 	unsigned int mSizeY;
