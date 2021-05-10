@@ -35,6 +35,7 @@ public:
 	//
 
 	void SetColor(glm::vec4 color);
+	void SetSize(glm::vec3 size);
 
 private:
 	/////////////////////////////////////////////////
