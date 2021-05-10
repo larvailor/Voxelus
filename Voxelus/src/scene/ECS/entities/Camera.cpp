@@ -6,14 +6,14 @@
 
 namespace
 {
-	const glm::vec3 StartPosition = glm::vec3(320.0f, 150.0f, 800.0f);
+	const glm::vec3 StartPosition = glm::vec3(320.0f, 250.0f, 600.0f);
 
 	const float MovementSpeed = 150.0f;
 	const float ShiftMultiplier = 2.2f;
 	const float RotationDegSpeed = 120.0f;
 
 	const float StartYaw = -90.0f;
-	const float StartPitch = 0.0f;
+	const float StartPitch = -42.0f;
 }
 
 /////////////////////////////////////////////////
@@ -34,8 +34,15 @@ Camera::Camera()
 	mCachedViewMatrix = glm::mat4(1.0f);
 	mCachedProjectionMatrix = glm::mat4(1.0f);
 
-	AddComponent<CameraComponent>();
 	GetComponent<TransformComponent>()->SetPosition(StartPosition);
+
+	AddComponent<CameraComponent>();
+
+	glm::vec3 newLookDirection;
+	newLookDirection.x = cos(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+	newLookDirection.y = sin(glm::radians(mPitch));
+	newLookDirection.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+	GetComponent<CameraComponent>()->SetLookDirection(glm::normalize(newLookDirection));
 }
 
 //-----------------------------------------------
@@ -121,8 +128,8 @@ void Camera::HandleInput(bool* keys)
 	if (Mouse::Button == GLFW_MOUSE_BUTTON_MIDDLE && Mouse::Action == GLFW_PRESS)
 	{
 		// Update rotation
-		mYaw += Mouse::OffsetX;
-		mPitch += Mouse::OffsetY;
+		mYaw += static_cast<float>(Mouse::OffsetX);
+		mPitch += static_cast<float>(Mouse::OffsetY);
 
 		if (mPitch > 89.0f)
 		{
@@ -138,8 +145,8 @@ void Camera::HandleInput(bool* keys)
 		newLookDirection.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
 		cameraComp->SetLookDirection(glm::normalize(newLookDirection));
 
-		Mouse::OffsetX = 0.0f;
-		Mouse::OffsetY = 0.0f;
+		Mouse::OffsetX = 0.0;
+		Mouse::OffsetY = 0.0;
 	}
 }
 

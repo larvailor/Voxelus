@@ -14,17 +14,18 @@
 #include "ECS/entities/Voxel.h"
 
 #include "World.h"
+#include "Ray.h"
 
 unsigned int Entity::NextEntityId = 1;
 
 float Time::DeltaTime = 0.0f;
 float Time::LastFrameTime = 0.0f;
 
-float Mouse::OffsetX = 0.0f;
-float Mouse::OffsetY = 0.0f;
-float Mouse::LastFrameXpos = 0.0f;
-float Mouse::LastFrameYpos = 0.0f;
-float Mouse::Sensitivity = 0.2f;
+double Mouse::OffsetX = 0.0;
+double Mouse::OffsetY = 0.0;
+double Mouse::LastFrameXpos = 0.0;
+double Mouse::LastFrameYpos = 0.0;
+double Mouse::Sensitivity = 0.2;
 int Mouse::Button = 0;
 int Mouse::Action = 0;
 int Mouse::Mods = 0;
@@ -52,34 +53,34 @@ namespace Mesh
 		};
 	}
 
-	//namespace Cube
-	//{
-	//	//	    1 - - -  0
-	//	//	  / .      / |
-	//	//	3  -.- - 2   |
-	//	//	|   6 . .|.  4
-	//	//	| .`     | /
-	//	//	6 - - -  7
+	namespace Cube
+	{
+		//	    1 - - -  0
+		//	  / .      / |
+		//	3  -.- - 2   |
+		//	|   6 . .|.  4
+		//	| .`     | /
+		//	6 - - -  7
 
-	//	const float HalfWidth = 10.0f;
-	//	unsigned int NumberOfVertices = 8;
-	//	float Vertices[] = {
-	//		// x, y, z
-	//		 HalfWidth,  HalfWidth, -HalfWidth,
-	//		-HalfWidth,  HalfWidth, -HalfWidth,
-	//		 HalfWidth,  HalfWidth,  HalfWidth,
-	//		-HalfWidth,  HalfWidth,  HalfWidth,
-	//		 HalfWidth, -HalfWidth, -HalfWidth,
-	//		-HalfWidth, -HalfWidth, -HalfWidth,
-	//		-HalfWidth, -HalfWidth,  HalfWidth,
-	//		 HalfWidth, -HalfWidth,  HalfWidth
-	//	};
+		const float HalfWidth = 10.0f;
+		unsigned int NumberOfVertices = 8;
+		float Vertices[] = {
+			// x, y, z
+			 HalfWidth,  HalfWidth, -HalfWidth,
+			-HalfWidth,  HalfWidth, -HalfWidth,
+			 HalfWidth,  HalfWidth,  HalfWidth,
+			-HalfWidth,  HalfWidth,  HalfWidth,
+			 HalfWidth, -HalfWidth, -HalfWidth,
+			-HalfWidth, -HalfWidth, -HalfWidth,
+			-HalfWidth, -HalfWidth,  HalfWidth,
+			 HalfWidth, -HalfWidth,  HalfWidth
+		};
 
-	//	unsigned int NumberOfIndices = 14;
-	//	unsigned int Indices[] = {
-	//		3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0
-	//	};
-	//};
+		unsigned int NumberOfIndices = 14;
+		unsigned int Indices[] = {
+			3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0
+		};
+	};
 
 	namespace LightSource
 	{
@@ -203,18 +204,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	{
 		mKeys[key] = false;
 	}
-
+	 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	Mouse::OffsetX = (static_cast<float>(xpos) - Mouse::LastFrameXpos) * Mouse::Sensitivity;
-	Mouse::OffsetY = (Mouse::LastFrameYpos - static_cast<float>(ypos)) * Mouse::Sensitivity;
+	Mouse::OffsetX = (xpos - Mouse::LastFrameXpos) * Mouse::Sensitivity;
+	Mouse::OffsetY = (Mouse::LastFrameYpos - ypos) * Mouse::Sensitivity;
 
-	Mouse::LastFrameXpos = static_cast<float>(xpos);
-	Mouse::LastFrameYpos = static_cast<float>(ypos);
+	Mouse::LastFrameXpos = xpos;
+	Mouse::LastFrameYpos = ypos;
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -232,16 +233,40 @@ void InitMouse(GLFWwindow* window)
 
 	double cursorXpos, cursorYpos;
 	glfwGetCursorPos(window, &cursorXpos, &cursorYpos);
-	Mouse::LastFrameXpos = static_cast<float>(cursorXpos);
-	Mouse::LastFrameYpos = static_cast<float>(cursorYpos);
+	Mouse::LastFrameXpos = cursorXpos;
+	Mouse::LastFrameYpos = cursorYpos;
 
-	Mouse::OffsetX = 0.0f;
-	Mouse::OffsetY = 0.0f;
+	Mouse::OffsetX = 0.0;
+	Mouse::OffsetY = 0.0;
 }
 
 void InitKeyboard(GLFWwindow* window)
 {
 	glfwSetKeyCallback(window, KeyCallback);
+}
+
+//-----------------------------------------------
+//		Else
+//
+
+Ray CalculateRay()
+{
+	// Mouse coords to OpenGL coords
+	double x = (2.0 * Mouse::LastFrameXpos) / InitConstants::Window::Width - 1.0;
+	////double y = (2.0 * mouseWindowY) / InitConstants::Window::Height - 1.0;
+	double y = 1.0 - (2.0 * Mouse::LastFrameYpos) / InitConstants::Window::Height;
+
+	// Homogeneous clip coords
+	glm::vec4 rayClipCoords = glm::vec4(x, y, -1.0f, 1.0f);
+
+	// To camera coords
+	glm::vec4 rayCameraCoords = glm::inverse(mMainCamera.GetProjectionMatrix()) * rayClipCoords;
+	rayCameraCoords = glm::vec4(rayCameraCoords.x, rayCameraCoords.y, -1.0f, 0.0f);
+		
+	// To world coords
+	glm::vec3 rayWorldCoords = glm::inverse(mMainCamera.GetViewMatrix()) * rayCameraCoords;
+
+	return Ray(mMainCamera.GetComponent<TransformComponent>()->GetPosition(), rayWorldCoords);
 }
 
 //-----------------------------------------------
@@ -293,9 +318,11 @@ int main(void)
 		InitKeyboard(window);
 		InitLight();
 		InitVoxelShader();
-		BatchRenderer::Init();
+		BatchLineRenderer::Init();
+		BatchCubeRenderer::Init();
 
-			 // Base cube buffers
+
+			// Base cube buffers
 		VertexArray baseCubeVA;
 		VertexBuffer baseCubeVB(Mesh::LightSource::Vertices, Mesh::LightSource::NumberOfVertices * 3 * sizeof(float));
 		VertexBufferLayout baseCubeVBL;
@@ -311,7 +338,10 @@ int main(void)
 		//-----------------------------------------------
 		//		Loop variables
 		//
-		
+
+		std::vector<Ray> rays;
+		bool lmbPressed = false;
+
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -326,7 +356,7 @@ int main(void)
 			float time = static_cast<float>(glfwGetTime());
 			Time::DeltaTime = time - Time::LastFrameTime;
 			Time::LastFrameTime = time;
-			std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
+			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
 				// Mouse
 
@@ -346,30 +376,77 @@ int main(void)
 			mMainCamera.OnTickUpdate();
 			mMainCamera.HandleInput(mKeys);
 
+				// Ray
+
+			if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
+			{
+				if (Mouse::Action == GLFW_PRESS)
+				{
+					//if (!lmbPressed)
+					{
+						Ray ray = CalculateRay();
+						rays.push_back(ray);
+						lmbPressed = true;
+					}
+				}
+				else if (Mouse::Action == GLFW_RELEASE)
+				{
+					lmbPressed = false;
+				}
+			}
+
 			//-----------------------------------------------
 			//		Render
 			//
 
 			mRenderer.Clear();
 
-				// Batch
-			BatchRenderer::BeginBatch();
+			// Batch
+				// Floor
+			BatchCubeRenderer::BeginBatch();
 			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
 			{
-				BatchRenderer::DrawCube(
+				BatchCubeRenderer::DrawCube(
 					voxel->GetComponent<TransformComponent>()->GetPosition(),
 					voxel->GetSize(),
 					voxel->GetColor()
 				);
 			}
-			BatchRenderer::EndBatch();
+			for (std::shared_ptr<Voxel> voxel : mWorld.GetVoxels())
+			{
+				BatchCubeRenderer::DrawCube(
+					voxel->GetComponent<TransformComponent>()->GetPosition(),
+					voxel->GetSize(),
+					voxel->GetColor()
+				);
+			}
+			BatchCubeRenderer::EndBatch();
 
 			mVoxelShader.Bind();
 			glm::mat4 viewProjMat = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix();
 			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
 			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
 
-			BatchRenderer::Flush();
+			BatchCubeRenderer::Flush();
+			mVoxelShader.Unbind();
+
+				// Draw lines
+			BatchLineRenderer::BeginBatch();
+			for (Ray& ray : rays)
+			{
+				BatchLineRenderer::DrawLine(
+					ray.GetOrigin(),
+					ray.GetOrigin() + ray.GetDirection() * 1000.0f,
+					glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)
+				);
+			}
+			BatchLineRenderer::EndBatch();
+
+			mVoxelShader.Bind();
+			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
+			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+
+			BatchLineRenderer::Flush();
 			mVoxelShader.Unbind();
 
 				// Draw coordinates directions
@@ -408,7 +485,7 @@ int main(void)
 	//		Deinitialize
 	//
 
-	BatchRenderer::DeInit();
+	BatchCubeRenderer::DeInit();
 
 	glfwTerminate();
 	return 0;

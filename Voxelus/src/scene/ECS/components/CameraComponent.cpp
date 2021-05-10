@@ -4,7 +4,7 @@
 
 namespace
 {
-	const float cStartNearPlane   = 0.01f;
+	const float cStartNearPlane   = 20.0f;
 	const float cStartFarPlane    = 2000.0f;
 	const float cStartFieldOfView = 60.0f;
 
@@ -79,7 +79,12 @@ ProjectionType CameraComponent::GetProjectionType() const
 
 glm::mat4 CameraComponent::GetProjectionMat() const
 {
-	return glm::perspective(glm::radians(mFieldOfView), 4.0f / 3.0f, mNearPlane, mFarPlane); // TODO: aspect ratio and projection type
+	return glm::perspective(
+		glm::radians(mFieldOfView), 
+		static_cast<float>(InitConstants::Window::AspecRatioX / InitConstants::Window::AspecRatioY), 
+		mNearPlane, 
+		mFarPlane
+	); // TODO: aspect ratio and projection type
 }
 
 ComponentType CameraComponent::GetStaticComponentType()

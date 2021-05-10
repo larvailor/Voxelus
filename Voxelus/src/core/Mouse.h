@@ -3,13 +3,15 @@
 class Mouse
 {
 public:
-	static float OffsetX;
-	static float OffsetY;
+	Mouse() = delete;
 
-	static float LastFrameXpos;
-	static float LastFrameYpos;
+	static double OffsetX;
+	static double OffsetY;
 
-	static float Sensitivity;
+	static double LastFrameXpos;
+	static double LastFrameYpos;
+
+	static double Sensitivity;
 
 	static int Button;
 	static int Action;

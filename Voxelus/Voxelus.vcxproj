@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\BatchRenderer.cpp" />
+    <ClCompile Include="src\Ray.cpp" />
     <ClCompile Include="src\core\Service.cpp" />
     <ClCompile Include="src\DynamicVertexBuffer.cpp" />
     <ClCompile Include="src\scene\ECS\components\BaseComponent.cpp" />
@@ -164,7 +165,7 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\Floor.shader" />
+    <None Include="res\shaders\Line.shader" />
     <None Include="res\shaders\LightSource.shader" />
     <None Include="res\shaders\Voxel.shader" />
   </ItemGroup>
@@ -172,6 +173,7 @@
     <ClInclude Include="src\BatchRenderer.h" />
     <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\core\Mouse.h" />
+    <ClInclude Include="src\Ray.h" />
     <ClInclude Include="src\core\Service.h" />
     <ClInclude Include="src\core\Time.h" />
     <ClInclude Include="src\DynamicVertexBuffer.h" />
