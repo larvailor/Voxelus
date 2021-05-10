@@ -81,11 +81,14 @@
     <ClCompile Include="src\BatchRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Voxel.shader" />
     <None Include="res\shaders\LightSource.shader" />
-    <None Include="res\shaders\Floor.shader" />
+    <None Include="res\shaders\Line.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -167,6 +170,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

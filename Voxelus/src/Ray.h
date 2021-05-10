@@ -1,6 +1,6 @@
 #pragma once
 
-class Time
+class Ray
 {
 public:
 	/////////////////////////////////////////////////
@@ -13,14 +13,23 @@ public:
 	//		Constructors
 	//
 
-	Time() = delete;
+	Ray();
+	Ray(glm::vec3 origin, glm::vec3 direction);
 
+	//-----------------------------------------------
+	//		Getters
+	//
+
+	glm::vec3 GetOrigin() const;
+	glm::vec3 GetDirection() const;
+
+private:
 	/////////////////////////////////////////////////
 	// 
-	//		Variables
+	//		Veriables
 	//
 	/////////////////////////////////////////////////
 
-	static float DeltaTime;
-	static float LastFrameTime;
+	glm::vec3 mOrigin;
+	glm::vec3 mDirection;
 };

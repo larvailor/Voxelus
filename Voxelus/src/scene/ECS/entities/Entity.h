@@ -2,8 +2,6 @@
 
 #include "ECS/components/BaseComponent.h"
 
-class Renderer;
-
 class Entity
 {
 public:

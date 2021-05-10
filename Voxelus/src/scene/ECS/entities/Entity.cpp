@@ -3,7 +3,6 @@
 #include "Entity.h"
 
 #include "ECS/components/Components.h"
-#include "Renderer.h"
 
 /////////////////////////////////////////////////
 // 

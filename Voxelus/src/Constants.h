@@ -4,6 +4,18 @@
 
 namespace InitConstants
 {
+	namespace Line
+	{
+		const std::string PathToShader = "res/shaders/Line.shader";
+
+		const unsigned int VerticesPerLine = 2;
+		const unsigned int IndicesPerLine = 2;
+
+		const unsigned int MaxBatchLines = 10000;
+		constexpr unsigned int MaxBatchVerticesCount = MaxBatchLines * VerticesPerLine;
+		constexpr unsigned int MaxBatchIndicesCount = MaxBatchLines * IndicesPerLine;
+	}
+
 	namespace Voxel
 	{
 		const std::string PathToShader = "res/shaders/Voxel.shader";
@@ -40,6 +52,9 @@ namespace InitConstants
 	{
 		const int Width = 1280;
 		const int Height = 720;
+
+		const double AspecRatioX = 4.0;
+		const double AspecRatioY = 3.0;
 	}
 
 	namespace Light
