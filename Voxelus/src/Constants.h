@@ -50,8 +50,8 @@ namespace InitConstants
 
 	namespace Window
 	{
-		const int Width = 1280;
-		const int Height = 720;
+		const int Width = 1600;
+		const int Height = 900;
 
 		const double AspecRatioX = 4.0;
 		const double AspecRatioY = 3.0;

@@ -9,7 +9,7 @@ namespace
 	const glm::vec3 StartPosition = glm::vec3(320.0f, 250.0f, 600.0f);
 
 	const float MovementSpeed = 150.0f;
-	const float ShiftMultiplier = 2.2f;
+	const float ShiftMultiplier = 4.0f;
 	const float RotationDegSpeed = 120.0f;
 
 	const float StartYaw = -90.0f;
