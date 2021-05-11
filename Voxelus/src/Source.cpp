@@ -249,7 +249,7 @@ void InitKeyboard(GLFWwindow* window)
 //		Else
 //
 
-Ray CalculateRay()
+Ray& CalculateRay()
 {
 	// Mouse coords to OpenGL coords
 	double x = (2.0 * Mouse::LastFrameXpos) / InitConstants::Window::Width - 1.0;
@@ -266,7 +266,8 @@ Ray CalculateRay()
 	// To world coords
 	glm::vec3 rayWorldCoords = glm::inverse(mMainCamera.GetViewMatrix()) * rayCameraCoords;
 
-	return Ray(mMainCamera.GetComponent<TransformComponent>()->GetPosition(), rayWorldCoords);
+	Ray ray(mMainCamera.GetComponent<TransformComponent>()->GetPosition(), rayWorldCoords);
+	return ray;
 }
 
 //-----------------------------------------------
@@ -340,6 +341,7 @@ int main(void)
 		//
 
 		std::vector<Ray> rays;
+		Ray ray;
 		bool lmbPressed = false;
 
 		/* Loop until the user closes the window */
@@ -356,7 +358,7 @@ int main(void)
 			float time = static_cast<float>(glfwGetTime());
 			Time::DeltaTime = time - Time::LastFrameTime;
 			Time::LastFrameTime = time;
-			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
+			std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
 				// Mouse
 
@@ -378,13 +380,13 @@ int main(void)
 
 				// Ray
 
+			ray = CalculateRay();
 			if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
 			{
 				if (Mouse::Action == GLFW_PRESS)
 				{
-					//if (!lmbPressed)
+					if (!lmbPressed)
 					{
-						Ray ray = CalculateRay();
 						rays.push_back(ray);
 						lmbPressed = true;
 					}
@@ -395,6 +397,9 @@ int main(void)
 				}
 			}
 
+				// World
+			mWorld.ProcessHoveringVoxels(ray);
+
 			//-----------------------------------------------
 			//		Render
 			//
@@ -404,15 +409,7 @@ int main(void)
 			// Batch
 				// Floor
 			BatchCubeRenderer::BeginBatch();
-			for (std::shared_ptr<Voxel> voxel : mWorld.GetFloor())
-			{
-				BatchCubeRenderer::DrawCube(
-					voxel->GetComponent<TransformComponent>()->GetPosition(),
-					voxel->GetSize(),
-					voxel->GetColor()
-				);
-			}
-			for (std::shared_ptr<Voxel> voxel : mWorld.GetVoxels())
+			for (std::shared_ptr<Voxel>& voxel : mWorld.GetVoxels())
 			{
 				BatchCubeRenderer::DrawCube(
 					voxel->GetComponent<TransformComponent>()->GetPosition(),

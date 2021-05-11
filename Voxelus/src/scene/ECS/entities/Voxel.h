@@ -2,6 +2,8 @@
 
 #include "Entity.h"
 
+class Ray;
+
 class Voxel : public Entity
 {
 public:
@@ -35,7 +37,16 @@ public:
 	//
 
 	void SetColor(glm::vec4 color);
+	void SetBaseColor(glm::vec4 color);
 	void SetSize(glm::vec3 size);
+	void SetHovered(bool isHovered);
+	void SetSelected(bool isSelected);
+
+	//-----------------------------------------------
+	//		Collisions
+	//
+
+	bool Intersects(glm::vec3 position);
 
 private:
 	/////////////////////////////////////////////////
@@ -45,5 +56,11 @@ private:
 	/////////////////////////////////////////////////
 
 	glm::vec4 mColor;
+	glm::vec4 mBaseColor;
+	glm::vec4 mHoveredColor;
+
 	glm::vec3 mSize;
+
+	bool mIsHovered;
+	bool mIsSelected;
 };

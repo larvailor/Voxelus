@@ -2,6 +2,8 @@
 
 #include "ECS/entities/Voxel.h"
 
+class Ray;
+
 class World
 {
 public:
@@ -24,12 +26,19 @@ public:
 	~World();
 
 	//-----------------------------------------------
+	//		Update
+	//
+
+	void ProcessHoveringVoxels(const Ray& ray);
+	
+	//-----------------------------------------------
 	//		Getters
 	//
 
 	std::vector<std::shared_ptr<Voxel>>& GetVoxels();
-	std::vector<std::shared_ptr<Voxel>>& GetFloor();
 	std::vector<std::shared_ptr<Voxel>>& GetCoordinateDirections();
+
+	std::shared_ptr<Voxel> GetVoxelThatIntersectingWithPoint(glm::vec3 position);
 
 private:
 	/////////////////////////////////////////////////
@@ -52,10 +61,16 @@ private:
 	/////////////////////////////////////////////////
 
 	std::vector<std::shared_ptr<Voxel>> mVoxels;
-	std::vector<std::shared_ptr<Voxel>> mFloor;
+	std::vector<std::shared_ptr<Voxel>> mHoveredVoxels;
+	//std::map<unsigned int, std::shared_ptr<Voxel>> mSelectedVoxelsIds;
+
 	std::vector<std::shared_ptr<Voxel>> mCoordDirections;
 
-	unsigned int mSizeX;
-	unsigned int mSizeY;
-	unsigned int mSizeZ;
+	unsigned int mVoxelsIds[InitConstants::World::MaxSizeX][InitConstants::World::MaxSizeY][InitConstants::World::MaxSizeZ] = { 0 };
+
+	std::map<unsigned int, std::shared_ptr<Voxel>> mVoxelsByIndexMap;
+
+	unsigned int mWorldSizeX;
+	unsigned int mWorldSizeY;
+	unsigned int mWorldSizeZ;
 };
