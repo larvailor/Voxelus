@@ -30,7 +30,8 @@ public:
 	//
 
 	void ProcessHoveringVoxels(const Ray& ray);
-	
+	void OnProcessTick();
+
 	//-----------------------------------------------
 	//		Getters
 	//
@@ -61,7 +62,8 @@ private:
 	/////////////////////////////////////////////////
 
 	std::vector<std::shared_ptr<Voxel>> mVoxels;
-	std::vector<std::shared_ptr<Voxel>> mHoveredVoxels;
+	//std::vector<std::shared_ptr<Voxel>> mHoveredVoxels;
+	std::shared_ptr<Voxel> mHoveredVoxel;
 	//std::map<unsigned int, std::shared_ptr<Voxel>> mSelectedVoxelsIds;
 
 	std::vector<std::shared_ptr<Voxel>> mCoordDirections;

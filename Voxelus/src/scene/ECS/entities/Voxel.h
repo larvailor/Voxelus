@@ -4,9 +4,21 @@
 
 class Ray;
 
+
 class Voxel : public Entity
 {
 public:
+	enum class HoveredSide
+	{
+		None = -1,
+		Back,
+		Front,
+		Left,
+		Right,
+		Bottom,
+		Top
+	};
+
 	/////////////////////////////////////////////////
 	// 
 	//		Methods
@@ -31,6 +43,7 @@ public:
 	
 	glm::vec4 GetColor() const;
 	glm::vec3 GetSize() const;
+	HoveredSide GetHoveredSide() const;
 	
 	//-----------------------------------------------
 	//		Setters
@@ -46,9 +59,21 @@ public:
 	//		Collisions
 	//
 
-	bool Intersects(glm::vec3 position);
+	HoveredSide GetPlaneNumberThatIntersectsWithRay(const Ray& ray, const glm::vec3& currRayPosition);
 
 private:
+	/////////////////////////////////////////////////
+	// 
+	//		Methods
+	//
+	/////////////////////////////////////////////////
+	 
+	//-----------------------------------------------
+	//		Collisions
+	//
+
+	bool RayPlaneIntersection(const glm::vec3& planeNormal, const glm::vec3& planePoint, const Ray& ray);
+
 	/////////////////////////////////////////////////
 	// 
 	//		Variables
@@ -62,5 +87,20 @@ private:
 	glm::vec3 mSize;
 
 	bool mIsHovered;
+	HoveredSide mHoveredSide = HoveredSide::None;
+
 	bool mIsSelected;
+
+	// back
+	glm::vec3 backPanelNormal = glm::vec3(0.0f, 0.0f, -1.0f);
+	// front
+	glm::vec3 frontPanelNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+	// left
+	glm::vec3 leftPanelNormal = glm::vec3(-1.0f, 0.0f, 0.0f);
+	// right
+	glm::vec3 rightPanelNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+	// bottom
+	glm::vec3 bottomPanelNormal = glm::vec3(0.0f, -1.0f, 0.0f);
+	// top
+	glm::vec3 topPanelNormal = glm::vec3(0.0f, 1.0f, 0.0f);
 };

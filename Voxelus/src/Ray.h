@@ -14,7 +14,7 @@ public:
 	//
 
 	Ray();
-	Ray(glm::vec3 origin, glm::vec3 direction);
+	Ray(glm::vec3 origin, glm::vec3 direction, float length);
 
 	//-----------------------------------------------
 	//		Getters
@@ -22,6 +22,7 @@ public:
 
 	glm::vec3 GetOrigin() const;
 	glm::vec3 GetDirection() const;
+	float GetLength() const;
 
 private:
 	/////////////////////////////////////////////////
@@ -32,4 +33,5 @@ private:
 
 	glm::vec3 mOrigin;
 	glm::vec3 mDirection;
+	float mLength;
 };

@@ -29,6 +29,7 @@ double Mouse::Sensitivity = 0.2;
 int Mouse::Button = 0;
 int Mouse::Action = 0;
 int Mouse::Mods = 0;
+bool Mouse::mLMB_Pressed = false;
 
 /////////////////////////////////////////////////
 // 
@@ -165,11 +166,6 @@ bool mKeys[1024];
 void InitVoxelShader()
 {
 	mVoxelShader.Initialize(InitConstants::Voxel::PathToShader);
-
-	mVoxelShader.Bind();
-	//mVoxelShader.SetUniform1f("u_HalfWidth", Mesh::Cube::HalfWidth);
-	mVoxelShader.SetUniform3f("u_LightColor", mLightColor.x, mLightColor.y, mLightColor.z);
-	mVoxelShader.Unbind();
 }
 
 void InitLightSourceShader()
@@ -184,7 +180,7 @@ void InitLightSourceShader()
 void InitLight()
 {
 	InitLightSourceShader();
-	mLightColor = glm::vec3(1.0f, 0.2f, 0.2f);
+	mLightColor = glm::vec3(InitConstants::Light::ColorR, InitConstants::Light::ColorG, InitConstants::Light::ColorB);
 
 	mLightSource.GetComponent<TransformComponent>()->SetPosition(glm::vec3(InitConstants::Light::PositionX, InitConstants::Light::PositionY, InitConstants::Light::PositionZ));
 }
@@ -266,7 +262,7 @@ Ray& CalculateRay()
 	// To world coords
 	glm::vec3 rayWorldCoords = glm::inverse(mMainCamera.GetViewMatrix()) * rayCameraCoords;
 
-	Ray ray(mMainCamera.GetComponent<TransformComponent>()->GetPosition(), rayWorldCoords);
+	Ray ray(mMainCamera.GetComponent<TransformComponent>()->GetPosition(), rayWorldCoords, 1000.0f);
 	return ray;
 }
 
@@ -358,7 +354,7 @@ int main(void)
 			float time = static_cast<float>(glfwGetTime());
 			Time::DeltaTime = time - Time::LastFrameTime;
 			Time::LastFrameTime = time;
-			std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
+			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
 				// Mouse
 
@@ -385,20 +381,21 @@ int main(void)
 			{
 				if (Mouse::Action == GLFW_PRESS)
 				{
-					if (!lmbPressed)
+					if (!Mouse::mLMB_Pressed)
 					{
 						rays.push_back(ray);
-						lmbPressed = true;
+						Mouse::mLMB_Pressed = true;
 					}
 				}
 				else if (Mouse::Action == GLFW_RELEASE)
 				{
-					lmbPressed = false;
+					Mouse::mLMB_Pressed = false;
 				}
 			}
 
 				// World
 			mWorld.ProcessHoveringVoxels(ray);
+			mWorld.OnProcessTick();
 
 			//-----------------------------------------------
 			//		Render
@@ -442,6 +439,10 @@ int main(void)
 			mVoxelShader.Bind();
 			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
 			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+
+			glm::vec3 lightPos = mLightSource.GetComponent<TransformComponent>()->GetPosition();
+			mVoxelShader.SetUniform3f("u_LightPos", lightPos.x, lightPos.y, lightPos.z);
+			mVoxelShader.SetUniform3f("u_LightColor", mLightColor.x, mLightColor.y, mLightColor.z);
 
 			BatchLineRenderer::Flush();
 			mVoxelShader.Unbind();

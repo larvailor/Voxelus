@@ -61,12 +61,12 @@ namespace InitConstants
 	{
 		const std::string PathToShader = "res/shaders/LightSource.shader";
 
-		const float PositionX = 150.0f;
-		const float PositionY = 50.0f;
-		const float PositionZ = 200.0f;
+		const float PositionX = 320.0f;
+		const float PositionY = 200.0f;
+		const float PositionZ = -100.0f;
 
-		const float ColorR = 0.2f;
-		const float ColorG = 0.7f;
-		const float ColorB = 0.3f;
+		const float ColorR = 1.0f;
+		const float ColorG = 1.0f;
+		const float ColorB = 1.0f;
 	}
 }

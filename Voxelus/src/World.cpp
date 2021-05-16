@@ -38,15 +38,22 @@ World::~World()
 
 void World::ProcessHoveringVoxels(const Ray& ray)
 {
-	for (std::shared_ptr<Voxel>& hoveredVoxel : mHoveredVoxels)
+	//for (std::shared_ptr<Voxel>& hoveredVoxel : mHoveredVoxels)
+	//{
+	//	hoveredVoxel->SetHovered(false);
+	//}
+	//mHoveredVoxels.clear();
+	//
+	
+	if (mHoveredVoxel)
 	{
-		hoveredVoxel->SetHovered(false);
+		mHoveredVoxel->SetHovered(false);
 	}
-	mHoveredVoxels.clear();
+	mHoveredVoxel = nullptr;
 
 	float maxRayLenght = 1000.0f;
 	glm::vec3 currRayPosition;
-	for (float length = 1.0f; length < maxRayLenght; length += 1.0f)
+	for (float length = 1.0f; length < maxRayLenght; length += 0.2f)
 	{
 		currRayPosition = ray.GetOrigin() + ray.GetDirection() * length;
 
@@ -54,10 +61,64 @@ void World::ProcessHoveringVoxels(const Ray& ray)
 		if (voxel != nullptr)
 		{
 			voxel->SetHovered(true);
-			mHoveredVoxels.push_back(voxel);
+			voxel->GetPlaneNumberThatIntersectsWithRay(ray, currRayPosition);
+			mHoveredVoxel = voxel;
 			break;
 		}
 	}
+}
+
+void World::OnProcessTick()
+{
+	// spawn voxel
+	if (Mouse::mLMB_Pressed)
+	{
+		if (mHoveredVoxel)
+		{
+			std::shared_ptr<Voxel> newVoxel = std::make_shared<Voxel>();
+			newVoxel->SetBaseColor(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+			glm::vec3 hoveredVoxelPos = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
+			glm::vec3 newVoxelPos = hoveredVoxelPos;
+			switch (mHoveredVoxel->GetHoveredSide())
+			{
+				case Voxel::HoveredSide::Back:
+					newVoxelPos.z = newVoxelPos.z - mHoveredVoxel->GetSize().z;
+					break;
+				case Voxel::HoveredSide::Front:
+					newVoxelPos.z = newVoxelPos.z + mHoveredVoxel->GetSize().z;
+					break;
+				case Voxel::HoveredSide::Left:
+					newVoxelPos.x = newVoxelPos.x - mHoveredVoxel->GetSize().x;
+					break;
+				case Voxel::HoveredSide::Right:
+					newVoxelPos.x = newVoxelPos.x + mHoveredVoxel->GetSize().x;
+					break;
+				case Voxel::HoveredSide::Bottom:
+					newVoxelPos.y = newVoxelPos.y - mHoveredVoxel->GetSize().y;
+					break;
+				case Voxel::HoveredSide::Top:
+					newVoxelPos.y = newVoxelPos.y + mHoveredVoxel->GetSize().y;
+					break;
+
+				case Voxel::HoveredSide::None:
+					return;
+					break;
+			}
+
+			unsigned int x = static_cast<unsigned int>(newVoxelPos.x / 20.0f);
+			unsigned int y = static_cast<unsigned int>(newVoxelPos.y / 20.0f);
+			unsigned int z = static_cast<unsigned int>(newVoxelPos.z / 20.0f);
+			if (mVoxelsIds[x][y][z] == 0)
+			{
+				newVoxel->GetComponent<TransformComponent>()->SetPosition(newVoxelPos);
+				mVoxels.push_back(newVoxel);
+				mVoxelsByIndexMap[newVoxel->GetId()] = newVoxel;
+				mVoxelsIds[x][y][z] = newVoxel->GetId();
+			}
+
+		}
+	}
+
 }
 
 //-----------------------------------------------

@@ -16,4 +16,6 @@ public:
 	static int Button;
 	static int Action;
 	static int Mods;
+
+	static bool mLMB_Pressed;
 };
