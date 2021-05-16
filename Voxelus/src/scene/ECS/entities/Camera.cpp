@@ -110,18 +110,21 @@ void Camera::HandleInput(bool* keys)
 	float rotationSpeed = RotationDegSpeed * Time::DeltaTime;
 	if (keys[GLFW_KEY_Q])
 	{
-		//glm::vec3 currentRotation = transformComp->GetRotation();
-		//currentRotation.y += rotationSpeed;
-		////currentRotation.y = static_cast<int>(currentRotation.y) % 365;
-		//transformComp->SetRotation(currentRotation);
-		//std::cout << " Rotation = " << transformComp->GetRotation().x << "  " << transformComp->GetRotation().y << "  " << transformComp->GetRotation().z << std::endl;
-		
-		cameraComp->SetLookDirection(glm::rotateY(cameraComp->GetLookDirection(), glm::radians(rotationSpeed)));
-		//std::cout << " Look dir = " << cameraComp->GetLookDirection().x << "  " << cameraComp->GetLookDirection().y << "  " << cameraComp->GetLookDirection().z << std::endl;
+		mYaw -= rotationSpeed;
+		glm::vec3 newLookDirection;
+		newLookDirection.x = cos(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		newLookDirection.y = sin(glm::radians(mPitch));
+		newLookDirection.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		cameraComp->SetLookDirection(glm::normalize(newLookDirection));
 	}
 	if (keys[GLFW_KEY_E])
 	{
-		cameraComp->SetLookDirection(glm::rotateY(cameraComp->GetLookDirection(), -glm::radians(rotationSpeed)));
+		mYaw += rotationSpeed;
+		glm::vec3 newLookDirection;
+		newLookDirection.x = cos(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		newLookDirection.y = sin(glm::radians(mPitch));
+		newLookDirection.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
+		cameraComp->SetLookDirection(glm::normalize(newLookDirection));
 	}
 
 
