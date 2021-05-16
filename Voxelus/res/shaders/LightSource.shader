@@ -10,7 +10,33 @@ void main()
 	gl_Position = u_MVP * position;
 }
 
+//
+//
+//		GEOMETRY
+//
+//
 
+#shader geometry
+#version 330 core
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 3) out;
+
+void main() {
+
+    for (int i = 0; i < gl_in.length(); i++)
+    {
+        gl_Position = gl_in[i].gl_Position;
+        EmitVertex();
+    }
+    EndPrimitive();
+}
+
+//
+//
+//		FRAGMENT
+//
+//
 
 #shader fragment
 #version 330 core
