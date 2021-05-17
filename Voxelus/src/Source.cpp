@@ -16,6 +16,9 @@
 #include "World.h"
 #include "Ray.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw_gl3.h"
+
 unsigned int Entity::NextEntityId = 1;
 
 float Time::DeltaTime = 0.0f;
@@ -32,6 +35,11 @@ int Mouse::Mods = 0;
 bool Mouse::mIsLMB_Pressed = false;
 bool Mouse::mWasLMB_Pressed = false;
 bool Mouse::mWasLMB_Released = false;
+
+float Instruments::BrushColorR = 0.7f;
+float Instruments::BrushColorG = 0.2f;
+float Instruments::BrushColorB = 0.3f;
+Instruments::Type Instruments::Current = Instruments::Type::Add;
 
 /////////////////////////////////////////////////
 // 
@@ -321,6 +329,7 @@ int main(void)
 		BatchCubeRenderer::Init();
 
 
+
 			// Base cube buffers
 		VertexArray baseCubeVA;
 		VertexBuffer baseCubeVB(Mesh::LightSource::Vertices, Mesh::LightSource::NumberOfVertices * 3 * sizeof(float));
@@ -342,6 +351,18 @@ int main(void)
 		Ray ray;
 		bool lmbPressed = false;
 
+
+		// Setup ImGui binding
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		ImGui_ImplGlfwGL3_Init(window, false);
+
+		// Setup style
+		ImGui::StyleColorsDark();
+		//ImGui::StyleColorsClassic();
+
+		ImVec4 BrushNewColor = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -351,6 +372,8 @@ int main(void)
 			//-----------------------------------------------
 			//		Update
 			//
+			
+			ImGui_ImplGlfwGL3_NewFrame();
 
 				// Delta time
 			float time = static_cast<float>(glfwGetTime());
@@ -389,7 +412,13 @@ int main(void)
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 				}
 			}
+			
+				// Instruments
 
+			Instruments::BrushColorR = BrushNewColor.x;
+			Instruments::BrushColorG = BrushNewColor.y;
+			Instruments::BrushColorB = BrushNewColor.z;
+		
 				// Camera
 			mMainCamera.OnTickUpdate();
 			mMainCamera.HandleInput(mKeys);
@@ -415,7 +444,7 @@ int main(void)
 
 				// World
 			mWorld.ProcessHoveringVoxels(ray);
-			mWorld.OnProcessTick();
+			mWorld.OnProcessTick(mKeys);
 
 			//-----------------------------------------------
 			//		Render
@@ -427,6 +456,14 @@ int main(void)
 				// Floor
 			BatchCubeRenderer::BeginBatch();
 			for (std::shared_ptr<Voxel>& voxel : mWorld.GetVoxels())
+			{
+				BatchCubeRenderer::DrawCube(
+					voxel->GetComponent<TransformComponent>()->GetPosition(),
+					voxel->GetSize(),
+					voxel->GetColor()
+				);
+			}
+			for (std::shared_ptr<Voxel>& voxel : mWorld.GetPossibleVoxels())
 			{
 				BatchCubeRenderer::DrawCube(
 					voxel->GetComponent<TransformComponent>()->GetPosition(),
@@ -497,6 +534,26 @@ int main(void)
 
 			mLightSourceShader.Unbind();
 
+			{
+				ImGui::ColorEdit3("clear color", (float*)&BrushNewColor);
+				if (ImGui::Button("Add"))
+				{
+					Instruments::Current = Instruments::Type::Add;
+				}
+				if (ImGui::Button("Delete"))
+				{
+					Instruments::Current = Instruments::Type::Delete;
+				}
+				if (ImGui::Button("Brush"))
+				{
+					Instruments::Current = Instruments::Type::Brush;
+				}
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			}
+
+			ImGui::Render();
+			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+
 			/* Swap front and back buffers */
 			GLCall(glfwSwapBuffers(window));
 		}
@@ -509,6 +566,8 @@ int main(void)
 
 	BatchCubeRenderer::DeInit();
 
+	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui::DestroyContext();
 	glfwTerminate();
 	return 0;
 }

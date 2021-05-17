@@ -38,13 +38,6 @@ World::~World()
 
 void World::ProcessHoveringVoxels(const Ray& ray)
 {
-	//for (std::shared_ptr<Voxel>& hoveredVoxel : mHoveredVoxels)
-	//{
-	//	hoveredVoxel->SetHovered(false);
-	//}
-	//mHoveredVoxels.clear();
-	//
-	
 	if (mHoveredVoxel)
 	{
 		mHoveredVoxel->SetHovered(false);
@@ -68,58 +61,186 @@ void World::ProcessHoveringVoxels(const Ray& ray)
 	}
 }
 
-void World::OnProcessTick()
+void World::OnProcessTick(bool* keys)
 {
 	// spawn voxel
-	if (Mouse::mWasLMB_Pressed)
+	if (Mouse::mWasLMB_Pressed && Instruments::Current == Instruments::Type::Add)
 	{
 		if (mHoveredVoxel)
 		{
-			std::shared_ptr<Voxel> newVoxel = std::make_shared<Voxel>();
-			newVoxel->SetBaseColor(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-			glm::vec3 hoveredVoxelPos = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
-			glm::vec3 newVoxelPos = hoveredVoxelPos;
-			switch (mHoveredVoxel->GetHoveredSide())
-			{
-				case Voxel::HoveredSide::Back:
-					newVoxelPos.z = newVoxelPos.z - mHoveredVoxel->GetSize().z;
-					break;
-				case Voxel::HoveredSide::Front:
-					newVoxelPos.z = newVoxelPos.z + mHoveredVoxel->GetSize().z;
-					break;
-				case Voxel::HoveredSide::Left:
-					newVoxelPos.x = newVoxelPos.x - mHoveredVoxel->GetSize().x;
-					break;
-				case Voxel::HoveredSide::Right:
-					newVoxelPos.x = newVoxelPos.x + mHoveredVoxel->GetSize().x;
-					break;
-				case Voxel::HoveredSide::Bottom:
-					newVoxelPos.y = newVoxelPos.y - mHoveredVoxel->GetSize().y;
-					break;
-				case Voxel::HoveredSide::Top:
-					newVoxelPos.y = newVoxelPos.y + mHoveredVoxel->GetSize().y;
-					break;
+			glm::vec3 newVoxelPosition = GetNewVoxelPosition();
+			std::shared_ptr<Voxel> newVoxel = SpawnVoxel(newVoxelPosition, mVoxels);
+		}
+	}
 
-				case Voxel::HoveredSide::None:
-					return;
-					break;
+	// shift voxel spawn
+	if (keys[GLFW_KEY_LEFT_SHIFT] && Instruments::Current == Instruments::Type::Add)
+	{
+		if (Mouse::mWasLMB_Pressed && !isSpawningInProgress)
+		{
+			if (mHoveredVoxel)
+			{
+				mFirstPossibleVoxelCoords = GetNewVoxelPosition();
+				isSpawningInProgress = true;
+			}
+		}
+		if (Mouse::mIsLMB_Pressed && !Mouse::mWasLMB_Released && isSpawningInProgress)
+		{
+			if (mHoveredVoxel)
+			{
+				mLastPossibleVoxelCoords = GetNewVoxelPosition();
 			}
 
-			unsigned int x = static_cast<unsigned int>(newVoxelPos.x / 20.0f);
-			unsigned int y = static_cast<unsigned int>(newVoxelPos.y / 20.0f);
-			unsigned int z = static_cast<unsigned int>(newVoxelPos.z / 20.0f);
-			if (x >= 0 && x < mWorldSizeX &&
-				y >= 0 && y < mWorldSizeY &&
-				z >= 0 && z < mWorldSizeZ)
+			mPossibleVoxels.clear();
+
+			glm::uvec3 firstPossibleVoxelCoords = GetNewVoxelWorldIndex(mFirstPossibleVoxelCoords);
+			glm::uvec3 lastPossibleVoxelCoords = GetNewVoxelWorldIndex(mLastPossibleVoxelCoords);
+
+			unsigned int xStart;
+			unsigned int xEnd;
+
+			if (static_cast<int>(lastPossibleVoxelCoords.x - firstPossibleVoxelCoords.x) >= 0)
 			{
-				if (mVoxelsIds[x][y][z] == 0)
+				xStart = firstPossibleVoxelCoords.x;
+				xEnd = lastPossibleVoxelCoords.x;
+			}
+			else
+			{
+				xStart = lastPossibleVoxelCoords.x;
+				xEnd = firstPossibleVoxelCoords.x;
+			}
+			if (xStart < 0)
+			{
+				xStart = 0;
+			}
+			if (xEnd > mWorldSizeX)
+			{
+				xEnd = mWorldSizeX - 1;
+			}
+
+			unsigned int yStart;
+			unsigned int yEnd;
+			if (static_cast<int>(lastPossibleVoxelCoords.y - firstPossibleVoxelCoords.y) >= 0)
+			{
+				yStart = firstPossibleVoxelCoords.y;
+				yEnd = lastPossibleVoxelCoords.y;
+			}
+			else
+			{
+				yStart = lastPossibleVoxelCoords.y;
+				yEnd = firstPossibleVoxelCoords.y;
+			}
+			if (yStart < 0)
+			{
+				yStart = 0;
+			}
+			if (yEnd > mWorldSizeY)
+			{
+				yEnd = mWorldSizeY - 1;
+			}
+
+			unsigned int zStart;
+			unsigned int zEnd;
+			if (static_cast<int>(lastPossibleVoxelCoords.z - firstPossibleVoxelCoords.z) >= 0)
+			{
+				zStart = firstPossibleVoxelCoords.z;
+				zEnd = lastPossibleVoxelCoords.z;
+			}
+			else
+			{
+				zStart = lastPossibleVoxelCoords.z;
+				zEnd = firstPossibleVoxelCoords.z;
+			}
+			if (zStart < 0)
+			{
+				zStart = 0;
+			}
+			if (zEnd > mWorldSizeZ)
+			{
+				zEnd = mWorldSizeZ - 1;
+			}
+
+
+			for (unsigned int y = yStart; y <= yEnd; y++)
+			{
+				for (unsigned int x = xStart; x <= xEnd; x++)
 				{
-					newVoxel->GetComponent<TransformComponent>()->SetPosition(newVoxelPos);
-					mVoxels.push_back(newVoxel);
-					mVoxelsByIndexMap[newVoxel->GetId()] = newVoxel;
-					mVoxelsIds[x][y][z] = newVoxel->GetId();
+					for (unsigned int z = zStart; z <= zEnd; z++)
+					{
+						glm::vec3 position = glm::vec3(x * 20.0f, y * 20.0f, z * 20.0f);
+						SpawnVoxel(position, mPossibleVoxels, true);
+					}
 				}
 			}
+
+			//std::cout << xStart << " " << xEnd << std::endl;
+		}
+		if (Mouse::mWasLMB_Released && isSpawningInProgress)
+		{
+			isSpawningInProgress = false;
+
+			for (std::shared_ptr<Voxel>& possibleVoxel : mPossibleVoxels)
+			{
+				mVoxelsByIndexMap[possibleVoxel->GetId()] = possibleVoxel;
+				glm::vec3 possiblePosition = possibleVoxel->GetComponent<TransformComponent>()->GetPosition();
+				glm::uvec3 possibleWorldIndex = GetNewVoxelWorldIndex(possiblePosition);
+				mVoxelsIds[possibleWorldIndex.x][possibleWorldIndex.y][possibleWorldIndex.z] = possibleVoxel->GetId();
+				mVoxels.push_back(possibleVoxel);
+			}
+
+			mPossibleVoxels.clear();
+		}
+	}
+	else
+	if (!keys[GLFW_KEY_LEFT_SHIFT] && isSpawningInProgress)
+	{
+		isSpawningInProgress = false;
+
+		for (std::shared_ptr<Voxel>& possibleVoxel : mPossibleVoxels)
+		{
+			mVoxelsByIndexMap[possibleVoxel->GetId()] = possibleVoxel;
+			glm::vec3 possiblePosition = possibleVoxel->GetComponent<TransformComponent>()->GetPosition();
+			glm::uvec3 possibleWorldIndex = GetNewVoxelWorldIndex(possiblePosition);
+			mVoxelsIds[possibleWorldIndex.x][possibleWorldIndex.y][possibleWorldIndex.z] = possibleVoxel->GetId();
+			mVoxels.push_back(possibleVoxel);
+		}
+
+		mPossibleVoxels.clear();
+	}
+
+	// Delete
+	if (Instruments::Current == Instruments::Type::Delete && Mouse::mWasLMB_Pressed)
+	{
+		if (mHoveredVoxel)
+		{
+			glm::vec3 hoveredVoxelPosition = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
+			glm::uvec3 mHoveredVoxelWorldIndex = GetNewVoxelWorldIndex(hoveredVoxelPosition);
+			mVoxelsIds[mHoveredVoxelWorldIndex.x][mHoveredVoxelWorldIndex.y][mHoveredVoxelWorldIndex.z] = 0;
+			mVoxelsByIndexMap.erase(mVoxelsByIndexMap.find(mHoveredVoxel->GetId()));
+
+			int hoveredIndex = -1;
+			for (unsigned int index = 0; index < mVoxels.size(); index++)
+			{
+				if (mVoxels[index]->GetId() == mHoveredVoxel->GetId())
+				{
+					hoveredIndex = index;
+					break;
+				}
+			}
+
+			if (hoveredIndex != -1)
+			{
+				mVoxels.erase(mVoxels.begin() + hoveredIndex);
+			}
+		}
+	}
+	
+	// Brush
+	if (Instruments::Current == Instruments::Type::Brush && Mouse::mIsLMB_Pressed)
+	{
+		if (mHoveredVoxel)
+		{
+			mHoveredVoxel->SetBaseColor(glm::vec4(Instruments::BrushColorR, Instruments::BrushColorG, Instruments::BrushColorB, 1.0f));
 		}
 	}
 }
@@ -131,6 +252,11 @@ void World::OnProcessTick()
 std::vector<std::shared_ptr<Voxel>>& World::GetVoxels()
 {
 	return mVoxels;
+}
+
+std::vector<std::shared_ptr<Voxel>>& World::GetPossibleVoxels()
+{
+	return mPossibleVoxels;
 }
 
 std::vector<std::shared_ptr<Voxel>>& World::GetCoordinateDirections()
@@ -163,6 +289,80 @@ std::shared_ptr<Voxel> World::GetVoxelThatIntersectingWithPoint(glm::vec3 positi
 //
 /////////////////////////////////////////////////
 
+
+std::shared_ptr<Voxel> World::SpawnVoxel(const glm::vec3 position, std::vector<std::shared_ptr<Voxel>>& voxels, bool isPossibleNewVoxel)
+{
+	glm::uvec3 newVoxelWorldIndex = GetNewVoxelWorldIndex(position);
+
+	if (newVoxelWorldIndex.x != -1.0f &&
+		newVoxelWorldIndex.y != -1.0f &&
+		newVoxelWorldIndex.z != -1.0f)
+	{
+		if (mVoxelsIds[newVoxelWorldIndex.x][newVoxelWorldIndex.y][newVoxelWorldIndex.z] == 0)
+		{
+			std::shared_ptr<Voxel> newVoxel = std::make_shared<Voxel>();
+			newVoxel->GetComponent<TransformComponent>()->SetPosition(position);
+			newVoxel->SetBaseColor(glm::vec4(Instruments::BrushColorR, Instruments::BrushColorG, Instruments::BrushColorB, 1.0f));
+
+			if (!isPossibleNewVoxel)
+			{
+				mVoxelsByIndexMap[newVoxel->GetId()] = newVoxel;
+				mVoxelsIds[newVoxelWorldIndex.x][newVoxelWorldIndex.y][newVoxelWorldIndex.z] = newVoxel->GetId();
+			}
+			voxels.push_back(newVoxel);
+
+			return newVoxel;
+		}
+	}
+
+	return nullptr;
+}
+
+glm::vec3 World::GetNewVoxelPosition()
+{
+	glm::vec3 hoveredVoxelPos = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
+	glm::vec3 newVoxelPos = hoveredVoxelPos;
+	switch (mHoveredVoxel->GetHoveredSide())
+	{
+	case Voxel::HoveredSide::Back:
+		newVoxelPos.z = newVoxelPos.z - mHoveredVoxel->GetSize().z;
+		break;
+	case Voxel::HoveredSide::Front:
+		newVoxelPos.z = newVoxelPos.z + mHoveredVoxel->GetSize().z;
+		break;
+	case Voxel::HoveredSide::Left:
+		newVoxelPos.x = newVoxelPos.x - mHoveredVoxel->GetSize().x;
+		break;
+	case Voxel::HoveredSide::Right:
+		newVoxelPos.x = newVoxelPos.x + mHoveredVoxel->GetSize().x;
+		break;
+	case Voxel::HoveredSide::Bottom:
+		newVoxelPos.y = newVoxelPos.y - mHoveredVoxel->GetSize().y;
+		break;
+	case Voxel::HoveredSide::Top:
+		newVoxelPos.y = newVoxelPos.y + mHoveredVoxel->GetSize().y;
+		break;
+
+	case Voxel::HoveredSide::None:
+		break;
+	}
+	return newVoxelPos;
+}
+
+glm::uvec3 World::GetNewVoxelWorldIndex(const glm::vec3& position)
+{
+	unsigned int x = static_cast<unsigned int>(position.x / 20.0f);
+	unsigned int y = static_cast<unsigned int>(position.y / 20.0f);
+	unsigned int z = static_cast<unsigned int>(position.z / 20.0f);
+	if (x >= 0 && x < mWorldSizeX &&
+		y >= 0 && y < mWorldSizeY &&
+		z >= 0 && z < mWorldSizeZ)
+	{
+		return glm::uvec3(x, y, z);
+	}
+
+	return glm::uvec3(-1, -1, -1);
+}
 
 void World::GenerateFloor()
 {

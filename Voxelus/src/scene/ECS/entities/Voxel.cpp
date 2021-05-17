@@ -81,7 +81,7 @@ void Voxel::SetHovered(bool isHovered)
 		//mHoveredSide = HoveredSide::None;
 	}
 
-	SetColor(isHovered ? mHoveredColor : mBaseColor);
+	SetColor(isHovered ? mBaseColor * 1.2f : mBaseColor);
 }
 
 void Voxel::SetSelected(bool isSelected)

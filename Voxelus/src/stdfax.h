@@ -4,6 +4,7 @@
 #include "core/Service.h"
 #include "core/Time.h"
 #include "core/Mouse.h"
+#include "core/Instruments.h"
 
 #include <iostream>
 #include <memory>

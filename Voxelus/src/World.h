@@ -30,13 +30,14 @@ public:
 	//
 
 	void ProcessHoveringVoxels(const Ray& ray);
-	void OnProcessTick();
+	void OnProcessTick(bool* keys);
 
 	//-----------------------------------------------
 	//		Getters
 	//
 
 	std::vector<std::shared_ptr<Voxel>>& GetVoxels();
+	std::vector<std::shared_ptr<Voxel>>& GetPossibleVoxels();
 	std::vector<std::shared_ptr<Voxel>>& GetCoordinateDirections();
 
 	std::shared_ptr<Voxel> GetVoxelThatIntersectingWithPoint(glm::vec3 position);
@@ -52,6 +53,9 @@ private:
 	//		Else
 	//
 
+	std::shared_ptr<Voxel> SpawnVoxel(glm::vec3 position, std::vector<std::shared_ptr<Voxel>>& voxels, bool isPossibleNewVoxel = false);
+	glm::vec3 GetNewVoxelPosition();
+	glm::uvec3 GetNewVoxelWorldIndex(const glm::vec3& position);
 	void GenerateFloor();
 	void GenerateCoordinateDirections();
 
@@ -62,8 +66,14 @@ private:
 	/////////////////////////////////////////////////
 
 	std::vector<std::shared_ptr<Voxel>> mVoxels;
-	//std::vector<std::shared_ptr<Voxel>> mHoveredVoxels;
+
+	bool isSpawningInProgress = false;
+	glm::vec3 mFirstPossibleVoxelCoords;
+	glm::vec3 mLastPossibleVoxelCoords;
+	std::vector<std::shared_ptr<Voxel>> mPossibleVoxels;
+
 	std::shared_ptr<Voxel> mHoveredVoxel;
+
 	//std::map<unsigned int, std::shared_ptr<Voxel>> mSelectedVoxelsIds;
 
 	std::vector<std::shared_ptr<Voxel>> mCoordDirections;
