@@ -17,5 +17,7 @@ public:
 	static int Action;
 	static int Mods;
 
-	static bool mLMB_Pressed;
+	static bool mIsLMB_Pressed;
+	static bool mWasLMB_Pressed;
+	static bool mWasLMB_Released;
 };

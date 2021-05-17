@@ -29,7 +29,9 @@ double Mouse::Sensitivity = 0.2;
 int Mouse::Button = 0;
 int Mouse::Action = 0;
 int Mouse::Mods = 0;
-bool Mouse::mLMB_Pressed = false;
+bool Mouse::mIsLMB_Pressed = false;
+bool Mouse::mWasLMB_Pressed = false;
+bool Mouse::mWasLMB_Released = false;
 
 /////////////////////////////////////////////////
 // 
@@ -357,6 +359,24 @@ int main(void)
 			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
 				// Mouse
+			Mouse::mWasLMB_Pressed = false;
+			Mouse::mWasLMB_Released = false;
+			if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
+			{
+				if (Mouse::Action == GLFW_PRESS)
+				{
+					if (!Mouse::mIsLMB_Pressed)
+					{
+						Mouse::mWasLMB_Pressed = true;
+					}
+					Mouse::mIsLMB_Pressed = true;
+				}
+				else if (Mouse::Action == GLFW_RELEASE)
+				{
+					Mouse::mIsLMB_Pressed = false;
+					Mouse::mWasLMB_Released = true;
+				}
+			}
 
 			if (Mouse::Button == GLFW_MOUSE_BUTTON_MIDDLE)
 			{
@@ -377,21 +397,21 @@ int main(void)
 				// Ray
 
 			ray = CalculateRay();
-			if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
-			{
-				if (Mouse::Action == GLFW_PRESS)
-				{
-					if (!Mouse::mLMB_Pressed)
-					{
-						rays.push_back(ray);
-						Mouse::mLMB_Pressed = true;
-					}
-				}
-				else if (Mouse::Action == GLFW_RELEASE)
-				{
-					Mouse::mLMB_Pressed = false;
-				}
-			}
+			//if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
+			//{
+			//	if (Mouse::Action == GLFW_PRESS)
+			//	{
+			//		if (!Mouse::mWasLMB_Pressed)
+			//		{
+			//			rays.push_back(ray);
+			//			Mouse::mWasLMB_Pressed = true;
+			//		}
+			//	}
+			//	else if (Mouse::Action == GLFW_RELEASE)
+			//	{
+			//		Mouse::mLMB_Pressed = false;
+			//	}
+			//}
 
 				// World
 			mWorld.ProcessHoveringVoxels(ray);
@@ -421,31 +441,35 @@ int main(void)
 			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
 			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
 
-			BatchCubeRenderer::Flush();
-			mVoxelShader.Unbind();
-
-				// Draw lines
-			BatchLineRenderer::BeginBatch();
-			for (Ray& ray : rays)
-			{
-				BatchLineRenderer::DrawLine(
-					ray.GetOrigin(),
-					ray.GetOrigin() + ray.GetDirection() * 1000.0f,
-					glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)
-				);
-			}
-			BatchLineRenderer::EndBatch();
-
-			mVoxelShader.Bind();
-			mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
-			mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
-
 			glm::vec3 lightPos = mLightSource.GetComponent<TransformComponent>()->GetPosition();
 			mVoxelShader.SetUniform3f("u_LightPos", lightPos.x, lightPos.y, lightPos.z);
 			mVoxelShader.SetUniform3f("u_LightColor", mLightColor.x, mLightColor.y, mLightColor.z);
 
-			BatchLineRenderer::Flush();
+			BatchCubeRenderer::Flush();
 			mVoxelShader.Unbind();
+
+			//	// Draw lines
+			//BatchLineRenderer::BeginBatch();
+			//for (Ray& ray : rays)
+			//{
+			//	BatchLineRenderer::DrawLine(
+			//		ray.GetOrigin(),
+			//		ray.GetOrigin() + ray.GetDirection() * 1000.0f,
+			//		glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)
+			//	);
+			//}
+			//BatchLineRenderer::EndBatch();
+
+			//mVoxelShader.Bind();
+			//mVoxelShader.SetUniformMat4f("u_ViewProj", viewProjMat);
+			//mVoxelShader.SetUniformMat4f("u_Transform", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+
+			//lightPos = mLightSource.GetComponent<TransformComponent>()->GetPosition();
+			//mVoxelShader.SetUniform3f("u_LightPos", lightPos.x, lightPos.y, lightPos.z);
+			//mVoxelShader.SetUniform3f("u_LightColor", mLightColor.x, mLightColor.y, mLightColor.z);
+
+			//BatchLineRenderer::Flush();
+			//mVoxelShader.Unbind();
 
 				// Draw coordinates directions
 			mLightSourceShader.Bind();
