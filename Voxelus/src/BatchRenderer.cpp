@@ -8,7 +8,6 @@ namespace
 	{
 		glm::vec3 Position;
 		glm::vec4 Color;
-		glm::vec3 Normal;
 	};
 
 	struct BatchRendererData
@@ -147,9 +146,6 @@ void BatchCubeRenderer::Init()
 
 	GLCall(glEnableVertexArrayAttrib(batchCubeRenderData.va, 1));
 	GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, Color)));
-	
-	GLCall(glEnableVertexArrayAttrib(batchCubeRenderData.va, 2));
-	GLCall(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, Normal)));
 
 	unsigned int offset = 0;
 	//	    4 - - -  5
@@ -269,49 +265,41 @@ void BatchCubeRenderer::DrawCube(const glm::vec3& position, const glm::vec3& siz
 	// 0
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x, position.y, position.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(-0.5f, -0.5f, -0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 1
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x + size.x, position.y, position.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(0.5f, -0.5f, -0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 2
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x + size.x, position.y, position.z + size.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(0.5f, -0.5f, 0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 3
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x, position.y, position.z + size.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(-0.5f, -0.5f, 0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 4
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x, position.y + size.y, position.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(-0.5f, 0.5f, -0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 5
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x + size.x, position.y + size.y, position.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(0.5f, 0.5f, -0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 6
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x + size.x, position.y + size.y, position.z + size.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(0.5f, 0.5f, 0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	// 7
 	batchCubeRenderData.bufferCurr->Position = glm::vec3(position.x, position.y + size.y, position.z + size.z);
 	batchCubeRenderData.bufferCurr->Color = color;
-	batchCubeRenderData.bufferCurr->Normal = glm::vec3(-0.5f, 0.5f, 0.5f);
 	batchCubeRenderData.bufferCurr++;
 
 	batchCubeRenderData.usedIndicesCount += InitConstants::Voxel::IndicesPerVoxel;

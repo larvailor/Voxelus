@@ -38,7 +38,7 @@ namespace InitConstants
 		const unsigned int MaxSizeY = 32;
 		const unsigned int MaxSizeZ = 32;
 
-		constexpr unsigned int MaxVoxelCount = MaxSizeX * (MaxSizeY + 1) * MaxSizeZ;
+		constexpr unsigned int MaxVoxelCount = MaxSizeX * MaxSizeY * MaxSizeZ;
 		constexpr unsigned int MaxVerticesCount = MaxVoxelCount * Voxel::VerticesPerVoxel;
 		constexpr unsigned int MaxIndicesCount = MaxVoxelCount * Voxel::IndicesPerVoxel;
 	}
