@@ -71,7 +71,7 @@ void World::ProcessHoveringVoxels(const Ray& ray)
 void World::OnProcessTick()
 {
 	// spawn voxel
-	if (Mouse::mLMB_Pressed)
+	if (Mouse::mWasLMB_Pressed)
 	{
 		if (mHoveredVoxel)
 		{
