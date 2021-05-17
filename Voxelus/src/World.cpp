@@ -108,17 +108,20 @@ void World::OnProcessTick()
 			unsigned int x = static_cast<unsigned int>(newVoxelPos.x / 20.0f);
 			unsigned int y = static_cast<unsigned int>(newVoxelPos.y / 20.0f);
 			unsigned int z = static_cast<unsigned int>(newVoxelPos.z / 20.0f);
-			if (mVoxelsIds[x][y][z] == 0)
+			if (x >= 0 && x < mWorldSizeX &&
+				y >= 0 && y < mWorldSizeY &&
+				z >= 0 && z < mWorldSizeZ)
 			{
-				newVoxel->GetComponent<TransformComponent>()->SetPosition(newVoxelPos);
-				mVoxels.push_back(newVoxel);
-				mVoxelsByIndexMap[newVoxel->GetId()] = newVoxel;
-				mVoxelsIds[x][y][z] = newVoxel->GetId();
+				if (mVoxelsIds[x][y][z] == 0)
+				{
+					newVoxel->GetComponent<TransformComponent>()->SetPosition(newVoxelPos);
+					mVoxels.push_back(newVoxel);
+					mVoxelsByIndexMap[newVoxel->GetId()] = newVoxel;
+					mVoxelsIds[x][y][z] = newVoxel->GetId();
+				}
 			}
-
 		}
 	}
-
 }
 
 //-----------------------------------------------
