@@ -78,7 +78,7 @@ void Voxel::SetHovered(bool isHovered)
 	mIsHovered = isHovered;
 	if (!isHovered)
 	{
-		mHoveredSide = HoveredSide::None;
+		//mHoveredSide = HoveredSide::None;
 	}
 
 	SetColor(isHovered ? mHoveredColor : mBaseColor);
@@ -106,7 +106,6 @@ Voxel::HoveredSide Voxel::GetPlaneNumberThatIntersectsWithRay(const Ray& ray, co
 		{
 			if (currRayPosition.z >= voxelOrigin.z - delta && currRayPosition.z <= voxelOrigin.z + delta)
 			{
-				//std::cout << "Back" << std::endl;
 				mHoveredSide = HoveredSide::Back;
 				return mHoveredSide;
 			}
