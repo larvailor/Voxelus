@@ -289,6 +289,24 @@ std::shared_ptr<Voxel> World::GetVoxelThatIntersectingWithPoint(glm::vec3 positi
 	return nullptr;
 }
 
+//-----------------------------------------------
+//		Else
+//
+
+void World::CreateVoxel(const glm::vec3 position, const glm::vec4 color)
+{
+	std::shared_ptr<Voxel> voxel = SpawnVoxel(position, mVoxels);
+	if (voxel != nullptr)
+	{
+		voxel->SetBaseColor(color);
+	}
+}
+
+void World::Clear()
+{
+	
+}
+
 /////////////////////////////////////////////////
 // 
 //		PRIVATE METHODS

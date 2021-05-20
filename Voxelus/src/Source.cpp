@@ -131,6 +131,9 @@ namespace Mesh
 World mWorld(InitConstants::World::MaxSizeX, InitConstants::World::MaxSizeY, InitConstants::World::MaxSizeZ);
 bool IsRenderMode = false;
 
+std::string saveName = "test1.txt";
+std::string loadName = "test1.txt";
+
 //-----------------------------------------------
 //		Entities
 //
@@ -169,6 +172,53 @@ bool mKeys[1024];
 //		Methods
 //
 /////////////////////////////////////////////////
+
+void SaveModel()
+{
+	std::ofstream saveFile;
+	saveFile.open(saveName);
+
+	if (saveFile.is_open())
+	{
+		for (std::shared_ptr<Voxel>& voxel : mWorld.GetVoxels())
+		{
+			if (!voxel->IsFloorPart)
+			{
+				glm::vec3 position = voxel->GetComponent<TransformComponent>()->GetPosition();
+				saveFile << position.x << " " << position.y << " " << position.z << " ";
+				glm::vec4 color = voxel->GetColor();
+				saveFile << color.x << " " << color.y << " " << color.z << "\n";
+			}
+		}
+	}
+
+	saveFile.close();
+}
+
+void LoadModel()
+{
+	std::string line;
+	std::stringstream ss;
+	std::ifstream loadFile(loadName);
+
+	glm::vec3 position;
+	glm::vec4 color;
+	if (loadFile.is_open())
+	{
+		while (getline(loadFile, line))
+		{
+			ss.clear();
+			ss.str(line);
+
+			ss >> position.x >> position.y >> position.z;
+			ss >> color.x >> color.y >> color.z;
+			color.w = 1.0f;
+
+			mWorld.CreateVoxel(position, color);
+		}
+		loadFile.close();
+	}
+}
 
 //-----------------------------------------------
 //		Shaders
@@ -216,7 +266,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		IsRenderMode = !IsRenderMode;
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
 }
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos)
@@ -331,7 +383,7 @@ int main(void)
 		BatchLineRenderer::Init();
 		BatchCubeRenderer::Init();
 
-
+		LoadModel();
 
 			// Base cube buffers
 		VertexArray baseCubeVA;
@@ -366,6 +418,9 @@ int main(void)
 
 		ImVec4 BrushNewColor = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 
+		bool instruments = false;
+		char saveModelPath[1024] = "";
+		char loadModelPath[1024] = "";
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -384,9 +439,6 @@ int main(void)
 			Time::LastFrameTime = time;
 			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
-			if (mKeys[GLFW_KEY_SPACE])
-			{
-			}
 				// Mouse
 			Mouse::mWasLMB_Pressed = false;
 			Mouse::mWasLMB_Released = false;
@@ -548,20 +600,37 @@ int main(void)
 
 			if (!IsRenderMode)
 			{
-				ImGui::ColorEdit3("clear color", (float*)&BrushNewColor);
-				if (ImGui::Button("Add"))
+				ImGui::Begin("Instruments", &instruments, ImGuiCond_Once);
+				ImGui::ColorEdit3("Color", (float*)&BrushNewColor);
+				if (ImGui::Button("Add", ImVec2(100.0f, 40.0f)))
 				{
 					Instruments::Current = Instruments::Type::Add;
 				}
-				if (ImGui::Button("Delete"))
+				ImGui::SameLine();
+				if (ImGui::Button("Delete", ImVec2(100.0f, 40.0f)))
 				{
 					Instruments::Current = Instruments::Type::Delete;
 				}
-				if (ImGui::Button("Brush"))
+				ImGui::SameLine();
+				if (ImGui::Button("Brush", ImVec2(100.0f, 40.0f)))
 				{
 					Instruments::Current = Instruments::Type::Brush;
 				}
+				ImGui::InputText("", loadModelPath, IM_ARRAYSIZE(loadModelPath)); ImGui::SameLine();
+				if (ImGui::Button("Load", ImVec2(60.0f, 20.0f)))
+				{
+					// load
+				}
+
+				ImGui::InputText("", loadModelPath, IM_ARRAYSIZE(loadModelPath));
+				ImGui::SameLine();
+				if (ImGui::Button("Save", ImVec2(60.0f, 20.0f)))
+				{
+					// load
+				}
+
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				ImGui::End();
 			}
 
 			ImGui::Render();
@@ -572,6 +641,7 @@ int main(void)
 		}
 	}
 
+	SaveModel();
 
 	//-----------------------------------------------
 	//		Deinitialize
