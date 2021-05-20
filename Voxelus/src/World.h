@@ -42,6 +42,13 @@ public:
 
 	std::shared_ptr<Voxel> GetVoxelThatIntersectingWithPoint(glm::vec3 position);
 
+	//-----------------------------------------------
+	//		Else
+	//
+
+	void CreateVoxel(const glm::vec3 position, const glm::vec4 color);
+	void Clear();
+
 private:
 	/////////////////////////////////////////////////
 	// 
