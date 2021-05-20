@@ -61,6 +61,8 @@ public:
 
 	HoveredSide GetPlaneNumberThatIntersectsWithRay(const Ray& ray, const glm::vec3& currRayPosition);
 
+	bool IsFloorPart = false;
+
 private:
 	/////////////////////////////////////////////////
 	// 

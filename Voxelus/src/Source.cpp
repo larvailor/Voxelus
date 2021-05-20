@@ -129,6 +129,7 @@ namespace Mesh
 /////////////////////////////////////////////////
 
 World mWorld(InitConstants::World::MaxSizeX, InitConstants::World::MaxSizeY, InitConstants::World::MaxSizeZ);
+bool IsRenderMode = false;
 
 //-----------------------------------------------
 //		Entities
@@ -211,6 +212,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		mKeys[key] = false;
 	}
 	 
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		IsRenderMode = !IsRenderMode;
+
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
@@ -259,7 +263,6 @@ Ray& CalculateRay()
 {
 	// Mouse coords to OpenGL coords
 	double x = (2.0 * Mouse::LastFrameXpos) / InitConstants::Window::Width - 1.0;
-	////double y = (2.0 * mouseWindowY) / InitConstants::Window::Height - 1.0;
 	double y = 1.0 - (2.0 * Mouse::LastFrameYpos) / InitConstants::Window::Height;
 
 	// Homogeneous clip coords
@@ -381,6 +384,9 @@ int main(void)
 			Time::LastFrameTime = time;
 			//std::cout << "DeltaTime = " << Time::DeltaTime << std::endl;
 
+			if (mKeys[GLFW_KEY_SPACE])
+			{
+			}
 				// Mouse
 			Mouse::mWasLMB_Pressed = false;
 			Mouse::mWasLMB_Released = false;
@@ -425,26 +431,14 @@ int main(void)
 
 				// Ray
 
-			ray = CalculateRay();
-			//if (Mouse::Button == GLFW_MOUSE_BUTTON_LEFT)
-			//{
-			//	if (Mouse::Action == GLFW_PRESS)
-			//	{
-			//		if (!Mouse::mWasLMB_Pressed)
-			//		{
-			//			rays.push_back(ray);
-			//			Mouse::mWasLMB_Pressed = true;
-			//		}
-			//	}
-			//	else if (Mouse::Action == GLFW_RELEASE)
-			//	{
-			//		Mouse::mLMB_Pressed = false;
-			//	}
-			//}
+			if (!IsRenderMode)
+			{
+				ray = CalculateRay();
 
 				// World
-			mWorld.ProcessHoveringVoxels(ray);
-			mWorld.OnProcessTick(mKeys);
+				mWorld.ProcessHoveringVoxels(ray);
+				mWorld.OnProcessTick(mKeys);
+			}
 
 			//-----------------------------------------------
 			//		Render
@@ -457,19 +451,34 @@ int main(void)
 			BatchCubeRenderer::BeginBatch();
 			for (std::shared_ptr<Voxel>& voxel : mWorld.GetVoxels())
 			{
-				BatchCubeRenderer::DrawCube(
-					voxel->GetComponent<TransformComponent>()->GetPosition(),
-					voxel->GetSize(),
-					voxel->GetColor()
-				);
+				if (!IsRenderMode)
+				{
+					BatchCubeRenderer::DrawCube(
+						voxel->GetComponent<TransformComponent>()->GetPosition(),
+						voxel->GetSize(),
+						voxel->GetColor()
+					);
+				}
+				else if (!voxel->IsFloorPart)
+				{
+					BatchCubeRenderer::DrawCube(
+						voxel->GetComponent<TransformComponent>()->GetPosition(),
+						voxel->GetSize(),
+						voxel->GetColor()
+					);
+				}
 			}
-			for (std::shared_ptr<Voxel>& voxel : mWorld.GetPossibleVoxels())
+			
+			if (!IsRenderMode)
 			{
-				BatchCubeRenderer::DrawCube(
-					voxel->GetComponent<TransformComponent>()->GetPosition(),
-					voxel->GetSize(),
-					voxel->GetColor()
-				);
+				for (std::shared_ptr<Voxel>& voxel : mWorld.GetPossibleVoxels())
+				{
+					BatchCubeRenderer::DrawCube(
+						voxel->GetComponent<TransformComponent>()->GetPosition(),
+						voxel->GetSize(),
+						voxel->GetColor()
+					);
+				}
 			}
 			BatchCubeRenderer::EndBatch();
 
@@ -509,18 +518,21 @@ int main(void)
 			//mVoxelShader.Unbind();
 
 				// Draw coordinates directions
-			mLightSourceShader.Bind();
-			for (std::shared_ptr<Voxel> direction : mWorld.GetCoordinateDirections())
+			if (!IsRenderMode)
 			{
-				glm::mat4 mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * direction->GetComponent<TransformComponent>()->GetTransformMat();
-				glm::vec4 directionColor = direction->GetColor();
+				mLightSourceShader.Bind();
+				for (std::shared_ptr<Voxel> direction : mWorld.GetCoordinateDirections())
+				{
+					glm::mat4 mvp = mMainCamera.GetProjectionMatrix() * mMainCamera.GetViewMatrix() * direction->GetComponent<TransformComponent>()->GetTransformMat();
+					glm::vec4 directionColor = direction->GetColor();
 
-				mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
-				mLightSourceShader.SetUniform3f("u_Color", directionColor.x, directionColor.y, directionColor.z);
+					mLightSourceShader.SetUniformMat4f("u_MVP", mvp);
+					mLightSourceShader.SetUniform3f("u_Color", directionColor.x, directionColor.y, directionColor.z);
 
-				mRenderer.Draw(baseCubeVA, baseCubeIB);
+					mRenderer.Draw(baseCubeVA, baseCubeIB);
+				}
+				mLightSourceShader.Unbind();
 			}
-			mLightSourceShader.Unbind();
 
 				// Draw light sources
 			mLightSourceShader.Bind();
@@ -534,6 +546,7 @@ int main(void)
 
 			mLightSourceShader.Unbind();
 
+			if (!IsRenderMode)
 			{
 				ImGui::ColorEdit3("clear color", (float*)&BrushNewColor);
 				if (ImGui::Button("Add"))

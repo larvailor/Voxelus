@@ -173,7 +173,6 @@ void World::OnProcessTick(bool* keys)
 				}
 			}
 
-			//std::cout << xStart << " " << xEnd << std::endl;
 		}
 		if (Mouse::mWasLMB_Released && isSpawningInProgress)
 		{
@@ -213,24 +212,28 @@ void World::OnProcessTick(bool* keys)
 	{
 		if (mHoveredVoxel)
 		{
-			glm::vec3 hoveredVoxelPosition = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
-			glm::uvec3 mHoveredVoxelWorldIndex = GetNewVoxelWorldIndex(hoveredVoxelPosition);
-			mVoxelsIds[mHoveredVoxelWorldIndex.x][mHoveredVoxelWorldIndex.y][mHoveredVoxelWorldIndex.z] = 0;
-			mVoxelsByIndexMap.erase(mVoxelsByIndexMap.find(mHoveredVoxel->GetId()));
-
-			int hoveredIndex = -1;
-			for (unsigned int index = 0; index < mVoxels.size(); index++)
+			if (!mHoveredVoxel->IsFloorPart)
 			{
-				if (mVoxels[index]->GetId() == mHoveredVoxel->GetId())
+				glm::vec3 hoveredVoxelPosition = mHoveredVoxel->GetComponent<TransformComponent>()->GetPosition();
+				glm::uvec3 mHoveredVoxelWorldIndex = GetNewVoxelWorldIndex(hoveredVoxelPosition);
+				mVoxelsIds[mHoveredVoxelWorldIndex.x][mHoveredVoxelWorldIndex.y][mHoveredVoxelWorldIndex.z] = 0;
+				mVoxelsByIndexMap.erase(mVoxelsByIndexMap.find(mHoveredVoxel->GetId()));
+
+				int hoveredIndex = -1;
+				for (unsigned int index = 0; index < mVoxels.size(); index++)
 				{
-					hoveredIndex = index;
-					break;
+					if (mVoxels[index]->GetId() == mHoveredVoxel->GetId())
+					{
+						hoveredIndex = index;
+						break;
+					}
 				}
-			}
 
-			if (hoveredIndex != -1)
-			{
-				mVoxels.erase(mVoxels.begin() + hoveredIndex);
+				if (hoveredIndex != -1)
+				{
+					mVoxels.erase(mVoxels.begin() + hoveredIndex);
+				}
+
 			}
 		}
 	}
@@ -240,7 +243,10 @@ void World::OnProcessTick(bool* keys)
 	{
 		if (mHoveredVoxel)
 		{
-			mHoveredVoxel->SetBaseColor(glm::vec4(Instruments::BrushColorR, Instruments::BrushColorG, Instruments::BrushColorB, 1.0f));
+			if (!mHoveredVoxel->IsFloorPart)
+			{
+				mHoveredVoxel->SetBaseColor(glm::vec4(Instruments::BrushColorR, Instruments::BrushColorG, Instruments::BrushColorB, 1.0f));
+			}
 		}
 	}
 }
@@ -387,6 +393,8 @@ void World::GenerateFloor()
 			mVoxelsByIndexMap[floorVoxel->GetId()] = floorVoxel;
 
 			mVoxelsIds[x][0][z] = floorVoxel->GetId();
+
+			floorVoxel->IsFloorPart = true;
 		}
 	}
 }
