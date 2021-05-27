@@ -4,11 +4,15 @@
 
 OpenGl wrappers created. Batch renderring support. Basic ECS system was implemented.
 
+## Main editor window
+
+![Image of  Main editor window](readme/editor_window.jpeg)
+
 ## Some render examples
 
-![Image of House Render Top](house_top.jpeg)
-![Image of House Render Front](house_frontside.jpeg)
-![Image of House Render Back](house_backside.jpeg)
+![Image of House Render Top](readme/house_top.jpeg)
+![Image of House Render Front](readme/house_frontside.jpeg)
+![Image of House Render Back](readme/house_backside.jpeg)
 
 ## TODO:
 Separate Voxelus and TypoEngine. TypoEngine should be a dll linked to the Voxelus.
