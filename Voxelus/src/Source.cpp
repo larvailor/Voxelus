@@ -13,6 +13,8 @@
 #include "ECS/entities/Camera.h"
 #include "ECS/entities/Voxel.h"
 
+#include "utils/FileManager.h"
+
 #include "World.h"
 #include "Ray.h"
 
@@ -131,9 +133,6 @@ namespace Mesh
 World mWorld(InitConstants::World::MaxSizeX, InitConstants::World::MaxSizeY, InitConstants::World::MaxSizeZ);
 bool IsRenderMode = false;
 
-std::string saveName = "test1.txt";
-std::string loadName = "test1.txt";
-
 //-----------------------------------------------
 //		Entities
 //
@@ -173,10 +172,10 @@ bool mKeys[1024];
 //
 /////////////////////////////////////////////////
 
-void SaveModel()
+void SaveModel(std::string savePath)
 {
 	std::ofstream saveFile;
-	saveFile.open(saveName);
+	saveFile.open(savePath);
 
 	if (saveFile.is_open())
 	{
@@ -195,11 +194,11 @@ void SaveModel()
 	saveFile.close();
 }
 
-void LoadModel()
+void LoadModel(std::string loadPath)
 {
 	std::string line;
 	std::stringstream ss;
-	std::ifstream loadFile(loadName);
+	std::ifstream loadFile(loadPath);
 
 	glm::vec3 position;
 	glm::vec4 color;
@@ -382,8 +381,6 @@ int main(void)
 		InitVoxelShader();
 		BatchLineRenderer::Init();
 		BatchCubeRenderer::Init();
-
-		LoadModel();
 
 			// Base cube buffers
 		VertexArray baseCubeVA;
@@ -616,17 +613,24 @@ int main(void)
 				{
 					Instruments::Current = Instruments::Type::Brush;
 				}
-				ImGui::InputText("", loadModelPath, IM_ARRAYSIZE(loadModelPath)); ImGui::SameLine();
-				if (ImGui::Button("Load", ImVec2(60.0f, 20.0f)))
+
+				if (ImGui::Button("Load...", ImVec2(100.0f, 20.0f)))
 				{
-					// load
+					std::string filePath = FileDialogs::OpenFile("Voxelus project (*.voxelus)\0*.voxelus\0", window);
+					if (!filePath.empty())
+					{
+						LoadModel(filePath);
+					}
 				}
 
-				ImGui::InputText("", loadModelPath, IM_ARRAYSIZE(loadModelPath));
 				ImGui::SameLine();
-				if (ImGui::Button("Save", ImVec2(60.0f, 20.0f)))
+				if (ImGui::Button("Save...", ImVec2(100.0f, 20.0f)))
 				{
-					// load
+					std::string filePath = FileDialogs::SaveFile("Voxelus project (*.voxelus)\0*.voxelus\0", window);
+					if (!filePath.empty())
+					{
+						SaveModel(filePath);
+					}
 				}
 
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -641,7 +645,7 @@ int main(void)
 		}
 	}
 
-	SaveModel();
+	SaveModel("autosave.voxelus");
 
 	//-----------------------------------------------
 	//		Deinitialize
