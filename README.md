@@ -6,7 +6,7 @@ OpenGl wrappers created. Batch renderring support. Basic ECS system was implemen
 
 ## Main editor window
 
-![Image of  Main editor window](readme/editor_window.jpeg)
+![Image of  Main editor window](readme/editor_window.png)
 
 ## Some render examples
 
